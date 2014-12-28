@@ -1,9 +1,5 @@
 'use strict';
 
-function now () {
-    return (Date.now() / 1000) >>> 0;
-}
-
 function transform (doc, ret, options) {
     delete ret._id;
     return ret;
@@ -15,7 +11,7 @@ var mongoose   = require('mongoose')
         email        : { type: String, required: true, index : { unique: true } }
       , salt         : { type: String, required: true }
       , passwordHash : { type: String, required: true }
-      , createdAt    : { type: Date, default : now }
+      , createdAt    : { type: Date, default : Date.now }
       , firstName    : String
       , lastName     : String
     }, {

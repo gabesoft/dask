@@ -8,7 +8,7 @@ module.exports = [{
   , handler : handler.create
 }, {
     method  : 'PUT'
-  , path    : '/user'
+  , path    : '/user/{id}'
   , handler : handler.update
 }, {
     method  : 'GET'
