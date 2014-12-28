@@ -14,6 +14,9 @@ help:
 tag:
 	@git tag -a "v$(VERSION)" -m "Version $(VERSION)"
 
+mongo:
+	@mongod --config /usr/local/etc/mongod.conf
+
 tag-push: tag
 	@git push --tags origin HEAD:master
 
