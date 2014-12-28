@@ -5,8 +5,7 @@ function now () {
 }
 
 function transform (doc, ret, options) {
-    delete ret.passwordHash;
-    delete ret.salt;
+    delete ret._id;
     return ret;
 }
 

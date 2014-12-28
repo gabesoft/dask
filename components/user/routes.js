@@ -1,6 +1,7 @@
 'use strict';
 
-var handler = require('./handlers');
+var handler = require('./handlers')
+  , Joi     = require('joi');
 
 module.exports = [{
     method  : 'POST'
@@ -10,6 +11,11 @@ module.exports = [{
     method  : 'PUT'
   , path    : '/user'
   , handler : handler.update
+  , validate : {
+        payload: {
+            id : Joi.string().required()
+        }
+    }
 }, {
     method  : 'GET'
   , path    : '/user/{id}'
