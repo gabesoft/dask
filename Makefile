@@ -17,6 +17,12 @@ tag:
 mongo:
 	@mongod --config /usr/local/etc/mongod.conf
 
+serve:
+	@node-dev server.js
+
+run:
+	@mpr run mpr.json
+
 tag-push: tag
 	@git push --tags origin HEAD:master
 

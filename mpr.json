@@ -1,0 +1,13 @@
+{
+    "server":{
+        "command": "node-dev",
+        "color": "grey",
+        "args" : ["server.js", "--port", "8006"],
+        "env": {}
+    },
+    "mongo":{
+        "command": "mongod",
+        "color": "green",
+        "args" : ["--config", "/usr/local/etc/mongod.conf"]
+    }
+}
