@@ -1,3 +1,5 @@
+'use strict';
+
 var User = require('./user-model')
   , Boom = require('boom');
 
@@ -46,7 +48,7 @@ function read (request, reply) {
     });
 }
 
-function delete (request, reply) {
+function remove (request, reply) {
     User.remove({ id: request.params.id }, function (err) {
         if (err) {
             reply(Boom.badImplementation(err.message));
@@ -60,5 +62,5 @@ module.exports = {
     create : create
   , read   : read
   , update : update
-  , delete : delete
+  , remove : remove
 };

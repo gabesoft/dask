@@ -23,5 +23,5 @@ module.exports = [{
 }, {
     method  : 'DELETE'
   , path    : '/user/{id}'
-  , handler : handler.delete
+  , handler : handler.remove
 }];
