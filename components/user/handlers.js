@@ -5,7 +5,7 @@ var User = require('./user-model')
 
 function create (request, reply) {
     var data = request.payload || {}
-      , user = User.create(data);
+      , user = new User(data);
 
     user.save(function (err) {
         if (err) {
@@ -42,6 +42,8 @@ function read (request, reply) {
     User.findOne({ id: request.params.id }, function (err, user) {
         if (err) {
             reply(Boom.badImplementation(err.message));
+        } else if (!user) {
+            reply(Boom.badRequest('No user found with id ' + request.params.id));
         } else {
             reply(user.toObject());
         }

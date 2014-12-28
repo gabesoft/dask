@@ -10,7 +10,8 @@ function transform (doc, ret, options) {
 }
 
 var mongoose   = require('mongoose')
-  , userSchema = mongoose.Schema({
+  , Schema     = mongoose.Schema
+  , userSchema = new Schema({
         email        : { type: String, required: true, index : { unique: true } }
       , salt         : { type: String, required: true }
       , passwordHash : { type: String, required: true }
@@ -20,7 +21,7 @@ var mongoose   = require('mongoose')
     }, {
         autoIndex : true
       , id        : true
-      , _id       : false
+      , _id       : true
       , strict    : true
       , toObject  : {
             virtuals  : true
