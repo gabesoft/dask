@@ -12,6 +12,10 @@ module.exports = [{
   , handler : handler.update
 }, {
     method  : 'GET'
+  , path    : '/user/byemail/{email}'
+  , handler : handler.readByEmail
+}, {
+    method  : 'GET'
   , path    : '/user/{id}'
   , handler : handler.read
 }, {

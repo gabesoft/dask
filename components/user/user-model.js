@@ -2,18 +2,18 @@
 
 function transform (doc, ret, options) {
     delete ret._id;
+    delete ret.__v;
     return ret;
 }
 
 var mongoose   = require('mongoose')
   , Schema     = mongoose.Schema
   , userSchema = new Schema({
-        email        : { type: String, required: true, index : { unique: true } }
-      , salt         : { type: String, required: true }
-      , passwordHash : { type: String, required: true }
-      , createdAt    : { type: Date, default : Date.now }
-      , firstName    : String
-      , lastName     : String
+        email     : { type: String, required: true, index : { unique: true } }
+      , password  : { type: String, required: true }
+      , createdAt : { type: Date, default : Date.now }
+      , firstName : String
+      , lastName  : String
     }, {
         autoIndex : true
       , id        : true

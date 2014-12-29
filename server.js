@@ -7,7 +7,7 @@ var path     = require('path')
   , server   = new Hapi.Server({
         debug: {
             log     : [ 'error' ]
-          , request : [ 'received', 'error' ]
+          , request : [ 'received', 'handler', 'response', 'error' ]
         }
     });
 
