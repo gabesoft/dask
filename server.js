@@ -4,12 +4,7 @@ var path     = require('path')
   , glob     = require('glob')
   , mongoose = require('mongoose')
   , Hapi     = require('hapi')
-  , server   = new Hapi.Server({
-        debug: {
-            log     : [ 'error' ]
-          , request : [ 'received', 'handler', 'response', 'error' ]
-        }
-    });
+  , server   = new Hapi.Server({});
 
 
 mongoose.connect('mongodb://localhost/dask', function (err) {
@@ -38,12 +33,31 @@ mongoose.connect('mongodb://localhost/dask', function (err) {
         });
     });
 
-    server.start(function (err) {
-        console.log('server started with connection:');
-        console.log(server.connections[0].info);
+    server.register({
+        register : require('good')
+      , options  : {
+            logRequestPayload  : true
+          , logResponsePayload : true
+          , reporters          : [{
+                reporter : require('good-console')
+              , args     : [
+                    { log: '*', response : '*' }
+                  , { format: 'hh:mm:ss.SSS' }
+                ]
+            }]
+        }
+    }, function (err) {
         if (err) {
             console.log(err);
             throw err;
         }
+
+        server.start(function (err) {
+            console.log('server started: ', server.info.uri);
+            if (err) {
+                console.log(err);
+                throw err;
+            }
+        });
     });
 });
