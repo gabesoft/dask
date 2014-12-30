@@ -1,7 +1,6 @@
 'use strict';
 
-var User = require('./user-model')
-  , Boom = require('boom');
+var User = require('./user-model');
 
 function create (request, reply) {
     var data = request.payload || {}
@@ -9,9 +8,9 @@ function create (request, reply) {
 
     user.save(function (err) {
         if (err && (err.name === 'ValidationError' || err.name === 'MongoError')) {
-            reply(Boom.badRequest(err));
+            reply.failBadRequest(err);
         } else if (err) {
-            reply(Boom.badImplementation(err));
+            reply.fail(err);
         } else {
             reply(user.toObject());
         }
@@ -23,17 +22,17 @@ function update (request, reply) {
 
     User.findOne({ _id: request.params.id }, function (err, user) {
         if (err && err.name === 'CastError') {
-            return reply(Boom.badRequest(err))
+            return reply.failBadRequest(err);
         } else if (err) {
-            return reply(Boom.badImplementation(err));
+            return reply.fail(err);
         } else if (!user) {
-            return reply(Boom.notFound('No user found with id ' + data.id));
+            return reply.failNotFound('No user found with id ' + data.id);
         }
 
         user.set(data);
         user.save(function (err) {
             if (err) {
-                reply(Boom.badImplementation(err));
+                reply.fail(err);
             } else {
                 reply(user.toObject());
             }
@@ -44,11 +43,11 @@ function update (request, reply) {
 function find (request, reply, query) {
     User.findOne(query, function (err, user) {
         if (err && err.name === 'CastError') {
-            reply(Boom.badRequest(err))
+            reply.failBadRequest(err);
         } else if (err) {
-            reply(Boom.badImplementation(err));
+            reply.fail(err);
         } else if (!user) {
-            reply(Boom.notFound('No user found with query ' + JSON.stringify(query)));
+            reply.failNotFound('No user found with query ' + JSON.stringify(query));
         } else {
             reply(user.toObject());
         }
@@ -66,9 +65,9 @@ function readByEmail (request, reply) {
 function remove (request, reply) {
     User.remove({ _id: request.params.id }, function (err) {
         if (err && err.name === 'CastError') {
-            reply(Boom.badRequest(err))
+            reply.failBadRequest(err);
         } else if (err) {
-            reply(Boom.badImplementation(err));
+            reply.fail(err);
         } else {
             reply({ status: 'deleted', id: request.params.id });
         }

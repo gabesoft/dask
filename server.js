@@ -21,6 +21,7 @@ mongoose.connect('mongodb://localhost/dask', function (err) {
         };
 
     server.connection({ port: 8006 });
+
     glob.sync('/**/routes.js', opts).forEach(function (file) {
         var routes = require(file);
 
@@ -33,7 +34,7 @@ mongoose.connect('mongodb://localhost/dask', function (err) {
         });
     });
 
-    server.register({
+    server.register([{
         register : require('good')
       , options  : {
             logRequestPayload  : true
@@ -41,12 +42,13 @@ mongoose.connect('mongodb://localhost/dask', function (err) {
           , reporters          : [{
                 reporter : require('good-console')
               , args     : [
-                    { log: '*', response : '*' }
-                  , { format: 'hh:mm:ss.SSS' }
-                ]
+                    { log: '*', response : '*', error: '*' }
+                  , { format: 'hh:mm:ss.SSS' } ]
             }]
         }
-    }, function (err) {
+    }, {
+        register : require('boom-decorate')
+    }], function (err) {
         if (err) {
             console.log(err);
             throw err;
