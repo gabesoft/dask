@@ -7,7 +7,9 @@ function create (request, reply) {
       , user = new User(data);
 
     user.save(function (err) {
-        if (err && (err.name === 'ValidationError' || err.name === 'MongoError')) {
+        if (err && err.name === 'MongoError' && err.code === 11000) {
+            reply.failConflict(err);
+        } else if (err && err.name === 'ValidationError') {
             reply.failBadRequest(err);
         } else if (err) {
             reply.fail(err);
