@@ -2,17 +2,22 @@
 
 var path     = require('path')
   , glob     = require('glob')
+  , async    = require('async')
   , mongoose = require('mongoose')
   , Hapi     = require('hapi')
   , server   = new Hapi.Server({});
 
+function mongooseConnect (cb) {
+    // TODO: get db url from config
+    mongoose.connect('mongodb://localhost/dask', cb);
+}
 
-mongoose.connect('mongodb://localhost/dask', function (err) {
-    if (err) {
-        console.error(err);
-        throw err;
-    }
+function setupServer (cb) {
+    server.connection({ port: 8006 });
+    cb(null);
+}
 
+function loadRoutes (cb) {
     var components = path.join(__dirname, 'components')
       , opts       = {
             nomount : false
@@ -20,21 +25,33 @@ mongoose.connect('mongodb://localhost/dask', function (err) {
           , root    : components
         };
 
-    server.connection({ port: 8006 });
+    glob('/**/routes.js', opts, function (err, files) {
+        if (err) { return cb(err); }
 
-    glob.sync('/**/routes.js', opts).forEach(function (file) {
-        var routes = require(file);
+        files.forEach(function (file) {
+            var routes = require(file);
 
-        if (!Array.isArray(routes)) {
-            routes = [routes];
-        }
+            if (!Array.isArray(routes)) {
+                routes = [routes];
+            }
 
-        routes.forEach(function (route) {
-            server.route(route);
+            routes.forEach(function (route) {
+                try {
+                    server.route(route);
+                } catch (e) {
+                    console.log('failed to add routes', file, e);
+                }
+            });
         });
-    });
 
+        cb(null);
+    });
+}
+
+function registerPlugins (cb) {
     server.register([{
+        register : require('boom-decorate')
+    }, {
         register : require('good')
       , options  : {
             logRequestPayload  : true
@@ -46,20 +63,25 @@ mongoose.connect('mongodb://localhost/dask', function (err) {
                   , { format: 'hh:mm:ss.SSS' } ]
             }]
         }
-    }, {
-        register : require('boom-decorate')
-    }], function (err) {
-        if (err) {
-            console.log(err);
-            throw err;
-        }
+    }], cb);
+}
 
-        server.start(function (err) {
-            console.log('server started: ', server.info.uri);
-            if (err) {
-                console.log(err);
-                throw err;
-            }
-        });
+function startServer (cb) {
+    server.start(function (err) {
+        console.log('server started: ', server.info.uri);
+        cb(err);
     });
+}
+
+async.series([
+    setupServer
+  , loadRoutes
+  , registerPlugins
+  , mongooseConnect
+  , startServer
+], function (err) {
+    if (err) {
+        console.log(err);
+        throw err;
+    }
 });

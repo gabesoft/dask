@@ -6,6 +6,7 @@
   "main": "./lib/index.js",
   "bin": {},
   "dependencies": {
+    "async": "^0.9.0",
     "boom": "^2.6.1",
     "boom-decorate": "~0.0.4",
     "glob": "^4.3.2",
