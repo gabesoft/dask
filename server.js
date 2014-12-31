@@ -7,7 +7,7 @@ var path     = require('path')
   , Hapi     = require('hapi')
   , server   = new Hapi.Server({});
 
-function mongooseConnect (cb) {
+function connectMongoose (cb) {
     // TODO: get db url from config
     mongoose.connect('mongodb://localhost/dask', cb);
 }
@@ -77,7 +77,7 @@ async.series([
     setupServer
   , loadRoutes
   , registerPlugins
-  , mongooseConnect
+  , connectMongoose
   , startServer
 ], function (err) {
     if (err) {
