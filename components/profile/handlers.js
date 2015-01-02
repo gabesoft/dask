@@ -17,7 +17,9 @@ function save (request, reply) {
         profile.set(data);
         profile.set({ userId: userId });
         profile.save(function (err) {
-            if (err) {
+            if (err && err.name === 'MongoError' && err.code === 11000) {
+                reply.failConflict(err);
+            } else if (err) {
                 reply.fail(err);
             } else {
                 reply(profile.toObject());

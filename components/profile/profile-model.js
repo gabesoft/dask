@@ -12,7 +12,7 @@ function transform (doc, ret, options) {
 function username () {
     var pat1 = Math.random().toString(36).slice(2)
       , pat2 = Date.now().toString(36);
-    return 'user' + pat1 + pat2;
+    return 'tempDisplayName-' + pat1 + pat2;
 }
 
 module.exports = mongoose.model('Profile', new Schema({
