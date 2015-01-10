@@ -1,7 +1,9 @@
 'use strict';
 
-var mongoose = require('mongoose')
-  , Schema   = mongoose.Schema;
+var mongoose  = require('mongoose')
+  , timestamp = require('../core/mongoose-plugins/timestamp')
+  , Schema    = mongoose.Schema
+  , User      = null;
 
 function transform (doc, ret, options) {
     delete ret._id;
@@ -9,10 +11,9 @@ function transform (doc, ret, options) {
     return ret;
 }
 
-module.exports = mongoose.model('User', new Schema({
-    email     : { type: String, required: true, index : { unique: true } }
-  , password  : { type: String, required: true }
-  , createdAt : { type: Date, default : Date.now }
+User = new Schema({
+    email    : { type: String, required: true, index : { unique: true } }
+  , password : { type: String, required: true }
 }, {
     autoIndex : true
   , id        : true
@@ -24,4 +25,8 @@ module.exports = mongoose.model('User', new Schema({
       , minimize  : true
       , transform : transform
     }
-}));
+});
+
+User.plugin(timestamp);
+
+module.exports = mongoose.model('User', User);

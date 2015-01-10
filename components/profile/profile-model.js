@@ -1,7 +1,9 @@
 'use strict';
 
-var mongoose = require('mongoose')
-  , Schema   = mongoose.Schema;
+var mongoose  = require('mongoose')
+  , timestamp = require('../core/mongoose-plugins/timestamp')
+  , Schema    = mongoose.Schema
+  , Profile   = null;
 
 function transform (doc, ret, options) {
     delete ret._id;
@@ -15,7 +17,7 @@ function username () {
     return 'tempDisplayName-' + pat1 + pat2;
 }
 
-module.exports = mongoose.model('Profile', new Schema({
+Profile = new Schema({
     displayName   : {
         type     : String
       , required : true
@@ -38,4 +40,8 @@ module.exports = mongoose.model('Profile', new Schema({
       , minimize  : true
       , transform : transform
     }
-}));
+});
+
+Profile.plugin(timestamp);
+
+module.exports = mongoose.model('Profile', Profile);
