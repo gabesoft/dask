@@ -43,15 +43,15 @@ function update (request, reply) {
 }
 
 function find (request, reply, query) {
-    User.findOne(query, function (err, user) {
+    User.find(query, function (err, users) {
         if (err && err.name === 'CastError') {
             reply.failBadRequest(err);
         } else if (err) {
             reply.fail(err);
-        } else if (!user) {
+        } else if (!users) {
             reply.failNotFound('No user found with query ' + JSON.stringify(query));
         } else {
-            reply(user.toObject());
+            reply(users.map(function (u) { return u.toObject(); }));
         }
     });
 }
@@ -60,8 +60,8 @@ function read (request, reply) {
     find(request, reply, { _id: request.params.id });
 }
 
-function readByEmail (request, reply) {
-    find(request, reply, { email: request.params.email });
+function search (request, reply) {
+    find(request, reply, request.query);
 }
 
 function remove (request, reply) {
@@ -77,9 +77,9 @@ function remove (request, reply) {
 }
 
 module.exports = {
-    create      : create
-  , read        : read
-  , readByEmail : readByEmail
-  , update      : update
-  , remove      : remove
+    create : create
+  , read   : read
+  , update : update
+  , remove : remove
+  , search : search
 };

@@ -4,22 +4,22 @@ var handler = require('./handlers');
 
 module.exports = [{
     method  : 'POST'
-  , path    : '/user'
+  , path    : '/users'
   , handler : handler.create
 }, {
-    method  : 'PUT'
-  , path    : '/user/{id}'
+    method  : 'GET'
+  , path    : '/users'
+  , handler : handler.search
+}, {
+    method  : [ 'PUT', 'PATCH' ]
+  , path    : '/users/{id}'
   , handler : handler.update
-}, {
+}, , {
     method  : 'GET'
-  , path    : '/user/byemail/{email}'
-  , handler : handler.readByEmail
-}, {
-    method  : 'GET'
-  , path    : '/user/{id}'
+  , path    : '/users/{id}'
   , handler : handler.read
 }, {
     method  : 'DELETE'
-  , path    : '/user/{id}'
+  , path    : '/users/{id}'
   , handler : handler.remove
 } ];
