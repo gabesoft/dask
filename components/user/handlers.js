@@ -42,14 +42,26 @@ function update (request, reply) {
     });
 }
 
+function findOne (request, reply, query) {
+    User.findOne(query, function (err, user) {
+        if (err && err.name === 'CastError') {
+            reply.failBadRequest(err);
+        } else if (err) {
+            reply.fail(err);
+        } else if (!user) {
+            reply.failNotFound('No user found with query ' + JSON.stringify(query));
+        } else {
+            reply(user.toObject());
+        }
+    });
+}
+
 function find (request, reply, query) {
     User.find(query, function (err, users) {
         if (err && err.name === 'CastError') {
             reply.failBadRequest(err);
         } else if (err) {
             reply.fail(err);
-        } else if (!users) {
-            reply.failNotFound('No user found with query ' + JSON.stringify(query));
         } else {
             reply(users.map(function (u) { return u.toObject(); }));
         }
@@ -57,7 +69,7 @@ function find (request, reply, query) {
 }
 
 function read (request, reply) {
-    find(request, reply, { _id: request.params.id });
+    findOne(request, reply, { _id: request.params.id });
 }
 
 function search (request, reply) {

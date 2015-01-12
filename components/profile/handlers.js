@@ -2,6 +2,22 @@
 
 var Profile = require('./profile-model');
 
+function find (request, reply, query) {
+    Profile.find(query, function (err, profiles) {
+        if (err && err.name === 'CastError') {
+            reply.failBadRequest(err);
+        } else if (err) {
+            reply.fail(err);
+        } else {
+            reply(profiles.map(function (p) { return p.toObject(); }));
+        }
+    });
+}
+
+function search (request, reply) {
+    find(request, reply, request.query);
+}
+
 function save (request, reply) {
     var data   = request.payload || {}
       , userId = request.params.id;
@@ -52,6 +68,7 @@ function read (request, reply) {
 }
 
 module.exports = {
-    save : save
-  , read : read
+    save   : save
+  , read   : read
+  , search : search
 };

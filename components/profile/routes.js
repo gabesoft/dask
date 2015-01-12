@@ -10,4 +10,8 @@ module.exports = [ {
     method  : 'GET'
   , path    : '/users/{id}/profile'
   , handler : handler.read
-} ]
+}, {
+    method  : 'GET'
+  , path    : '/profiles'
+  , handler : handler.search
+} ];
