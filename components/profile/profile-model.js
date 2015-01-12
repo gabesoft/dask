@@ -14,7 +14,7 @@ function transform (doc, ret, options) {
 function username () {
     var pat1 = Math.random().toString(36).slice(2)
       , pat2 = Date.now().toString(36);
-    return 'tempDisplayName-' + pat1 + pat2;
+    return 'temp-display-name-' + pat1 + pat2;
 }
 
 Profile = new Schema({
