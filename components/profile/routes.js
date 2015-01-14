@@ -9,6 +9,10 @@ module.exports = [ {
 }, {
     method  : 'GET'
   , path    : '/users/{id}/profile'
+  , handler : handler.readByUser
+}, {
+    method : 'GET'
+  , path : '/profiles/{id}'
   , handler : handler.read
 }, {
     method  : 'GET'

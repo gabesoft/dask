@@ -5,9 +5,9 @@ var Profile = require('./profile-model');
 function find (request, reply, query) {
     Profile.find(query, function (err, profiles) {
         if (err && err.name === 'CastError') {
-            reply.failBadRequest(err);
+            reply.badRequest(err);
         } else if (err) {
-            reply.fail(err);
+            reply.boom(err);
         } else {
             reply(profiles.map(function (p) { return p.toObject(); }));
         }
@@ -20,13 +20,15 @@ function search (request, reply) {
 
 function save (request, reply) {
     var data   = request.payload || {}
+      , isNew  = false
       , userId = request.params.id;
 
     Profile.findOne({ userId: userId }, function (err, profile) {
         if (err) {
-            return reply.failBadRequest(err);
+            return reply.badRequest(err);
         }
         if (!profile) {
+            isNew   = true;
             profile = new Profile();
         }
 
@@ -34,9 +36,11 @@ function save (request, reply) {
         profile.set({ userId: userId });
         profile.save(function (err) {
             if (err && err.name === 'MongoError' && err.code === 11000) {
-                reply.failConflict(err);
+                reply.conflict(err);
             } else if (err) {
-                reply.fail(err);
+                reply.boom(err);
+            } else if (isNew) {
+                reply.created(profile.toObject(), '/profiles/' + profile.id);
             } else {
                 reply(profile.toObject());
             }
@@ -45,20 +49,32 @@ function save (request, reply) {
 }
 
 function read (request, reply) {
+    Profile.findOne({ _id: request.params.id }, function (err, profile) {
+        if (err) {
+            return reply.internal(err);
+        } else if (!profile) {
+            return reply.notFound('No profile found with id ' + request.params.id);
+        } else {
+            return reply(profile.toObject());
+        }
+    });
+}
+
+function readByUser (request, reply) {
     var userId = request.params.id;
 
     Profile.findOne({ userId : userId }, function (err, profile) {
         if (err) {
-            return reply.failBadRequest(err);
+            return reply.badRequest(err);
         }
         if (!profile) {
             profile = new Profile();
             profile.set({ userId: userId });
             profile.save(function (err) {
                 if (err) {
-                    reply.fail(err);
+                    reply.boom(err);
                 } else {
-                    reply(profile.toObject());
+                    reply.created(profile.toObject(), '/profiles/' + profile.id);
                 }
             });
         } else {
@@ -68,7 +84,8 @@ function read (request, reply) {
 }
 
 module.exports = {
-    save   : save
-  , read   : read
-  , search : search
+    save       : save
+  , read       : read
+  , readByUser : readByUser
+  , search     : search
 };

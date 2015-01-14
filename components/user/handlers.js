@@ -1,20 +1,23 @@
 'use strict';
 
-var User = require('./user-model');
+var User = require('./user-model')
+  , url  = require('url');
 
 function create (request, reply) {
     var data = request.payload || {}
-      , user = new User(data);
+      , user = new User(data)
+      , uri  = request.url;
 
     user.save(function (err) {
         if (err && err.name === 'MongoError' && err.code === 11000) {
-            reply.failConflict(err);
+            reply.conflict(err);
         } else if (err && err.name === 'ValidationError') {
-            reply.failBadRequest(err);
+            reply.badRequest(err);
         } else if (err) {
-            reply.fail(err);
+            reply.boom(err);
         } else {
-            reply(user.toObject());
+            uri.pathname = [uri.pathname, user.id].join('/');
+            reply.created(user.toObject(), url.format(uri));
         }
     });
 }
@@ -24,17 +27,17 @@ function update (request, reply) {
 
     User.findOne({ _id: request.params.id }, function (err, user) {
         if (err && err.name === 'CastError') {
-            return reply.failBadRequest(err);
+            return reply.badRequest(err);
         } else if (err) {
-            return reply.fail(err);
+            return reply.boom(err);
         } else if (!user) {
-            return reply.failNotFound('No user found with id ' + data.id);
+            return reply.notFound('No user found with id ' + data.id);
         }
 
         user.set(data);
         user.save(function (err) {
             if (err) {
-                reply.fail(err);
+                reply.boom(err);
             } else {
                 reply(user.toObject());
             }
@@ -45,11 +48,11 @@ function update (request, reply) {
 function findOne (request, reply, query) {
     User.findOne(query, function (err, user) {
         if (err && err.name === 'CastError') {
-            reply.failBadRequest(err);
+            reply.badRequest(err);
         } else if (err) {
-            reply.fail(err);
+            reply.boom(err);
         } else if (!user) {
-            reply.failNotFound('No user found with query ' + JSON.stringify(query));
+            reply.notFound('No user found with query ' + JSON.stringify(query));
         } else {
             reply(user.toObject());
         }
@@ -59,9 +62,9 @@ function findOne (request, reply, query) {
 function find (request, reply, query) {
     User.find(query, function (err, users) {
         if (err && err.name === 'CastError') {
-            reply.failBadRequest(err);
+            reply.badRequest(err);
         } else if (err) {
-            reply.fail(err);
+            reply.boom(err);
         } else {
             reply(users.map(function (u) { return u.toObject(); }));
         }
@@ -79,9 +82,9 @@ function search (request, reply) {
 function remove (request, reply) {
     User.remove({ _id: request.params.id }, function (err) {
         if (err && err.name === 'CastError') {
-            reply.failBadRequest(err);
+            reply.badRequest(err);
         } else if (err) {
-            reply.fail(err);
+            reply.boom(err);
         } else {
             reply({ status: 'deleted', id: request.params.id });
         }

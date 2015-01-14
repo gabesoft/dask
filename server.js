@@ -50,7 +50,7 @@ function loadRoutes (cb) {
 
 function registerPlugins (cb) {
     server.register([{
-        register : require('boom-decorate')
+        register : require('http-status-decorator')
     }, {
         register : require('good')
       , options  : {
