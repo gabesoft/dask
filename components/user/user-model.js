@@ -14,6 +14,7 @@ function transform (doc, ret, options) {
 User = new Schema({
     email    : { type: String, required: true, index : { unique: true } }
   , password : { type: String, required: true }
+  , disabled : { type: Boolean, required: true, default: false }
 }, {
     autoIndex : true
   , id        : true

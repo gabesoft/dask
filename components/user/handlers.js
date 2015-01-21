@@ -1,7 +1,9 @@
 'use strict';
 
-var User = require('./user-model')
-  , url  = require('url');
+var User                = require('./user-model')
+  , RecordNotFoundError = require('../core/errors/record-not-found')
+  , GuidExpiredError    = require('../core/errors/guid-expired')
+  , url                 = require('url');
 
 function create (request, reply) {
     var data = request.payload || {}
@@ -31,7 +33,7 @@ function update (request, reply) {
         } else if (err) {
             return reply.boom(err);
         } else if (!user) {
-            return reply.notFound('No user found with id ' + data.id);
+            return reply.boom(new RecordNotFoundError('user', data.id));
         }
 
         user.set(data);
@@ -52,7 +54,7 @@ function findOne (request, reply, query) {
         } else if (err) {
             reply.boom(err);
         } else if (!user) {
-            reply.notFound('No user found with query ' + JSON.stringify(query));
+            reply.boom(new RecordNotFoundError('user', query));
         } else {
             reply(user.toObject());
         }
@@ -76,7 +78,11 @@ function read (request, reply) {
 }
 
 function search (request, reply) {
-    find(request, reply, request.query);
+    if (request.query.guid) {
+        findByGuid(request, reply);
+    } else {
+        find(request, reply, request.query);
+    }
 }
 
 function remove (request, reply) {
@@ -86,7 +92,44 @@ function remove (request, reply) {
         } else if (err) {
             reply.boom(err);
         } else {
-            reply({ status: 'deleted', id: request.params.id });
+            reply({ status: 'user-deleted', id: request.params.id });
+        }
+    });
+}
+
+function link (request, reply) {
+    var guid         = request.payload.guid
+      , ttlInSeconds = request.payload.ttlInSeconds
+      , userId       = request.payload.userId
+      , redis        = request.server.app.redis
+      , key          = 'user-' + guid;
+
+    redis.multi()
+       .set(key, userId)
+       .expire(key, ttlInSeconds)
+       .exec(function (err, result) {
+            if (err) { return reply.boom(err); }
+
+            reply({
+                status : 'link-created'
+              , userId : userId
+              , guid   : guid
+            });
+        });
+}
+
+function findByGuid (request, reply) {
+    var guid  = request.query.guid
+      , key   = 'user-' + guid
+      , redis = request.server.app.redis;
+
+    redis.get(key, function (err, userId) {
+        if (err) {
+            reply.boom(err);
+        } else if (!userId) {
+            reply.boom(new GuidExpiredError(guid));
+        } else {
+            findOne(request, reply, { _id: userId });
         }
     });
 }
@@ -97,4 +140,5 @@ module.exports = {
   , update : update
   , remove : remove
   , search : search
+  , link   : link
 };

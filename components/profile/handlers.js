@@ -1,6 +1,7 @@
 'use strict';
 
-var Profile = require('./profile-model');
+var Profile             = require('./profile-model')
+  , RecordNotFoundError = require('../core/errors/record-not-found')
 
 function find (request, reply, query) {
     Profile.find(query, function (err, profiles) {
@@ -51,11 +52,11 @@ function save (request, reply) {
 function read (request, reply) {
     Profile.findOne({ _id: request.params.id }, function (err, profile) {
         if (err) {
-            return reply.internal(err);
+            reply.internal(err);
         } else if (!profile) {
-            return reply.notFound('No profile found with id ' + request.params.id);
+            reply.boom(new RecordNotFoundError('profile', request.params.id));
         } else {
-            return reply(profile.toObject());
+            reply(profile.toObject());
         }
     });
 }
@@ -65,9 +66,8 @@ function readByUser (request, reply) {
 
     Profile.findOne({ userId : userId }, function (err, profile) {
         if (err) {
-            return reply.badRequest(err);
-        }
-        if (!profile) {
+            reply.badRequest(err);
+        } else if (!profile) {
             profile = new Profile();
             profile.set({ userId: userId });
             profile.save(function (err) {

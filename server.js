@@ -4,12 +4,32 @@ var path     = require('path')
   , glob     = require('glob')
   , async    = require('async')
   , mongoose = require('mongoose')
+  , redis    = require('redis')
+  , conf     = require('./config/store.js')
   , Hapi     = require('hapi')
   , server   = new Hapi.Server({});
 
 function connectMongoose (cb) {
-    // TODO: get db url from config
-    mongoose.connect('mongodb://localhost/dask', cb);
+    var host = conf.get('mongo:host')
+      , db   = conf.get('mongo:database')
+      , url  = 'mongodb://' + host + '/' + db;
+    mongoose.connect(url, cb);
+}
+
+function connectRedis (cb) {
+    var port   = conf.get('redis:port')
+      , host   = conf.get('redis.host')
+      , opts   = {}
+      , client = redis.createClient(port, host, opts);
+
+    client.on('ready', function () {
+        server.app.redis = client;
+        cb();
+    });
+    client.on('error', cb);
+    client.on('error', function (err) {
+        console.log(err);
+    });
 }
 
 function setupServer (cb) {
@@ -78,6 +98,7 @@ async.series([
   , loadRoutes
   , registerPlugins
   , connectMongoose
+  , connectRedis
   , startServer
 ], function (err) {
     if (err) {

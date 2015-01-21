@@ -1,0 +1,14 @@
+{
+    "app": {
+        "url": "http://localhost:8006",
+        "port": 8006
+    },
+    "mongo": {
+        "database": "dask",
+        "host": "localhost"
+    },
+    "redis": {
+        "host": "localhost",
+        "port": 6379
+    }
+}

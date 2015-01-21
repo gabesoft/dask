@@ -19,6 +19,10 @@ module.exports = [{
   , path    : '/users/{id}'
   , handler : handler.read
 }, {
+    method  : [ 'PUT', 'POST', 'PATCH' ]
+  , path    : '/users/link'
+  , handler : handler.link
+}, {
     method  : 'DELETE'
   , path    : '/users/{id}'
   , handler : handler.remove
