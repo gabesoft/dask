@@ -18,4 +18,4 @@ npm-debug.log
 pids
 results
 tmp
-config/production.config
+config/production.json
