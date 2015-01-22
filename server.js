@@ -12,7 +12,8 @@ var path     = require('path')
 function connectMongoose (cb) {
     var host = conf.get('mongo:host')
       , db   = conf.get('mongo:database')
-      , url  = 'mongodb://' + host + '/' + db;
+      , port = conf.get('mongo:port')
+      , url  = 'mongodb://' + host + ':' + port + '/' + db;
     mongoose.connect(url, cb);
 }
 
