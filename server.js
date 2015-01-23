@@ -34,7 +34,7 @@ function connectRedis (cb) {
 }
 
 function setupServer (cb) {
-    server.connection({ port: 8006 });
+    server.connection({ port: conf.get('app:port') || 8006 });
     cb(null);
 }
 
