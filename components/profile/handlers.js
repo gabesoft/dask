@@ -1,7 +1,7 @@
 'use strict';
 
 var Profile             = require('./profile-model')
-  , RecordNotFoundError = require('../core/errors/record-not-found')
+  , RecordNotFoundError = require('../core/errors/record-not-found');
 
 function find (request, reply, query) {
     Profile.find(query, function (err, profiles) {

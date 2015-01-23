@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function (schema, options) {
     schema.add({
         createdAt: { type: Date, default: Date.now }
