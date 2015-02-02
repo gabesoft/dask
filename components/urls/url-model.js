@@ -12,8 +12,10 @@ function transform (doc, ret, options) {
     return ret;
 }
 
-function hash (text) {
-    return crypto.createHash('md5').update(text).digest('hex');
+function hash (url) {
+    var userId = url.get('userId')
+      , href   = url.get('href');
+    return crypto.createHash('md5').update(userId + href).digest('hex');
 }
 
 Url = new Schema({
@@ -40,7 +42,7 @@ Url = new Schema({
 
 Url.pre('save', function (next) {
     if (this.isNew) {
-        this.set('_id', this.get('userId') + hash(this.get('href')));
+        this.set('_id', hash(this));
     }
     next();
 });

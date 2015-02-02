@@ -6,7 +6,7 @@ util.inherits(RecordNotFoundError, Error);
 
 function RecordNotFoundError (type, criteria) {
     if (!(this instanceof RecordNotFoundError)) {
-        return new RecordNotFoundError();
+        return new RecordNotFoundError(type, criteria);
     }
     this.statusCode = 404;
     this.name = 'RecordNotFound';

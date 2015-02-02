@@ -12,4 +12,8 @@ module.exports = [{
     method  : 'DELETE'
   , path    : '/users/{userId}/urls/{id}'
   , handler : handler.remove
+}, {
+    method  : 'GET'
+  , path    : '/users/{userId}/urls/{id}'
+  , handler : handler.read
 }];

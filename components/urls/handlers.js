@@ -25,13 +25,15 @@ function create (request, reply) {
 }
 
 function update (request, reply) {
-    var userId = request.params.userId;
+    var userId = request.params.userId
+      , id     = request.params.id
+      , query  = { _id: id, userId: userId };
 
-    Url.findOne({_id: request.params.id}, function (err, url) {
+    UrlModel.findOne(query, function (err, url) {
         if (err) {
             reply.boom(err);
         } else if (!url) {
-            reply.boom(new RecordNotFoundError('url', request.params.id));
+            reply.boom(new RecordNotFoundError('url', query));
         } else {
             url.set(request.payload || {});
             url.set({ userId: userId })
@@ -45,8 +47,24 @@ function update (request, reply) {
 function remove (request, reply) {
     var userId = request.params.userId;
 
-    Url.remove({ _id: request.params.id, userId: userId }, function (err) {
+    UrlModel.remove({ _id: request.params.id, userId: userId }, function (err) {
         return err ? reply.boom(err) : reply({ status: 'url-deleted', id: request.params.id });
+    });
+}
+
+function read (request, reply) {
+    var userId = request.params.userId
+      , id     = request.params.id
+      , query  = { _id: id, userId: userId };
+
+    UrlModel.findOne(query, function (err, url) {
+        if (err) {
+            reply.boom(err);
+        } else if (!url) {
+            reply.boom(new RecordNotFoundError('url', query));
+        } else {
+            reply(url.toObject());
+        }
     });
 }
 
@@ -54,4 +72,5 @@ module.exports = {
     create : create
   , update : update
   , remove : remove
+  , read   : read
 };
