@@ -24,7 +24,7 @@ Profile = new Schema({
       , default  : username
       , index    : { unique : true }
     }
-  , userId        : { type: Schema.Types.ObjectId, ref: 'User' }
+  , userId        : { type: Schema.Types.ObjectId, ref: 'User', required: true }
   , gravatarEmail : String
   , firstName     : String
   , lastName      : String

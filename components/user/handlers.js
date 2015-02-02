@@ -25,18 +25,16 @@ function create (request, reply) {
 }
 
 function update (request, reply) {
-    var data = request.payload || {};
-
     User.findOne({ _id: request.params.id }, function (err, user) {
         if (err && err.name === 'CastError') {
             return reply.badRequest(err);
         } else if (err) {
             return reply.boom(err);
         } else if (!user) {
-            return reply.boom(new RecordNotFoundError('user', data.id));
+            return reply.boom(new RecordNotFoundError('user', request.params.id));
         }
 
-        user.set(data);
+        user.set(request.payload || {});
         user.save(function (err) {
             if (err) {
                 reply.boom(err);
