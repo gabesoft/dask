@@ -19,14 +19,16 @@ function hash (url) {
 }
 
 Url = new Schema({
-    _id     : { type: String }
-  , userId  : { type: Schema.Types.ObjectId, ref: 'User', required: true }
-  , href    : { type: String, required: true }
-  , title   : { type: String}
-  , rank    : { type: Number }
-  , notes   : { type: String }
-  , tags    : { type: [String], index: true }
-  , private : { type: Boolean, required: true, default: false }
+    _id         : { type: String }
+  , userId      : { type: Schema.Types.ObjectId, ref: 'User', required: true }
+  , href        : { type: String, required: true }
+  , userEntered : { type: String, required: true }
+  , favicon     : { type: String, required: true }
+  , title       : { type: String}
+  , rank        : { type: Number }
+  , notes       : { type: String }
+  , tags        : { type: [String], index: true }
+  , private     : { type: Boolean, required: true, default: false }
 }, {
     autoIndex : true
   , id        : true
