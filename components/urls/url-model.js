@@ -49,6 +49,10 @@ Url.pre('save', function (next) {
     next();
 });
 
+Url.post('save', function (doc) {
+    this.emit('saved', doc);
+});
+
 Url.plugin(timestamp);
 
 module.exports = mongoose.model('Url', Url);

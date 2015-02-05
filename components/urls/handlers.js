@@ -4,13 +4,22 @@ var UrlModel            = require('./url-model')
   , RecordNotFoundError = require('../core/errors/record-not-found')
   , urlUtil             = require('url');
 
+function saveTags (redis, url) {
+    redis.sadd('tags', url.get('tags'));
+}
+
 function create (request, reply) {
-    var urlObject  = new UrlModel(request.payload || {})
+    var url  = new UrlModel(request.payload || {})
       , userId     = request.params.userId
+      , redis      = request.server.app.redis
       , requestUrl = request.url;
 
-    urlObject.set({ userId: userId })
-    urlObject.save(function (err) {
+    url.on('save', function (doc) {
+        saveTags(redis, doc);
+    });
+
+    url.set({ userId: userId });
+    url.save(function (err) {
         if (err && err.name === 'MongoError' && err.code === 11000) {
             reply.conflict(err);
         } else if (err && err.name === 'ValidationError') {
@@ -18,14 +27,15 @@ function create (request, reply) {
         } else if (err) {
             reply.boom(err);
         } else {
-            requestUrl.pathname = [requestUrl.pathname, urlObject.id].join('/');
-            reply.created(urlObject.toObject(), urlUtil.format(requestUrl));
+            requestUrl.pathname = [requestUrl.pathname, url.id].join('/');
+            reply.created(url.toObject(), urlUtil.format(requestUrl));
         }
     });
 }
 
 function update (request, reply) {
     var userId = request.params.userId
+      , redis  = request.server.app.redis
       , id     = request.params.id
       , query  = { _id: id, userId: userId };
 
@@ -35,8 +45,12 @@ function update (request, reply) {
         } else if (!url) {
             reply.boom(new RecordNotFoundError('url', query));
         } else {
+            url.on('save', function (doc) {
+                saveTags(redis, doc);
+            });
+
             url.set(request.payload || {});
-            url.set({ userId: userId })
+            url.set({ userId: userId });
             url.save(function (err) {
                 return err ? reply.boom(err) : reply(url.toObject());
             });
