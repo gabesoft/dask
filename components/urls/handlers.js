@@ -5,7 +5,14 @@ var UrlModel            = require('./url-model')
   , urlUtil             = require('url');
 
 function saveTags (redis, url) {
-    redis.sadd('tags', url.get('tags'));
+    var tags = url.get('tags') || [];
+    if (tags.length > 0) {
+        redis.sadd('tags', tags, function (err, data) {
+            if (err) {
+                console.log('failed to save tags', tags, err);
+            }
+        });
+    }
 }
 
 function create (request, reply) {

@@ -46,6 +46,13 @@ Url.pre('save', function (next) {
     if (this.isNew) {
         this.set('_id', hash(this));
     }
+
+    var tags = this.get('tags') || [];
+
+    this.set('tags', tags.map(function (t) {
+        return t.toLowerCase();
+    }));
+
     next();
 });
 
