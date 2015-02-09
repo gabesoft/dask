@@ -89,9 +89,24 @@ function read (request, reply) {
     });
 }
 
+function search (request, reply) {
+    var userId = request.params.userId
+      , query  = request.query || {};
+
+    query.userId = userId;
+    UrlModel.find(query, function (err, urls) {
+        if (err) {
+            return reply.boom(err);
+        } else {
+            reply(urls.map(function (u) { return u.toObject(); }));
+        }
+    });
+}
+
 module.exports = {
     create : create
   , update : update
   , remove : remove
   , read   : read
+  , search   : search
 };

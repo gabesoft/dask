@@ -51,7 +51,7 @@ Url.pre('save', function (next) {
 
     this.set('tags', tags.map(function (t) {
         return t.toLowerCase();
-    }));
+    }).sort());
 
     next();
 });

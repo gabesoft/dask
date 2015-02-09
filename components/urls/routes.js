@@ -16,4 +16,8 @@ module.exports = [{
     method  : 'GET'
   , path    : '/users/{userId}/urls/{id}'
   , handler : handler.read
+}, {
+    method  : 'GET'
+  , path    : '/users/{userId}/urls'
+  , handler : handler.search
 }];
