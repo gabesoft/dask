@@ -47,11 +47,14 @@ Url.pre('save', function (next) {
         this.set('_id', hash(this));
     }
 
-    var tags = this.get('tags') || [];
+    var tags = this.get('tags') || []
+      , uniq = {};
 
-    this.set('tags', tags.map(function (t) {
-        return t.toLowerCase();
-    }).sort());
+    tags.forEach(function (tag) {
+        uniq[tag.toLowerCase()] = tag;
+    });
+
+    this.set('tags', Object.keys(uniq).sort());
 
     next();
 });
