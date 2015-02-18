@@ -3,7 +3,7 @@
 var parser = require('./query-parser');
 
 function Query (input) {
-    this.parse(input);
+    this.parse((input || '').trim());
     this.initCriteria();
     this.initFields();
     this.initSort();
@@ -98,5 +98,16 @@ Query.prototype.initFields = function () {
 Query.prototype.initSort = function () {
     this.sort = this.textSearch ? { score: { $meta: 'textScore' } } : {};
 };
+
+Query.prototype.addSort = function (sort) {
+    if (!sort) { return; }
+
+    sort = sort.split('/\s+/');
+    sort.forEach(function (s) {
+        s = s.split(':');
+        this.sort[s[0]] = (s[1] === 'desc') ? -1 : 1;
+    }.bind(this));
+};
+
 
 module.exports.Query = Query;

@@ -90,25 +90,22 @@ function read (request, reply) {
     });
 }
 
-function textSearch (params, cb) {
-    var query = new UrlQuery(params.search);
+function searchDb (query, cb) {
     UrlModel
        .find(query.criteria, query.fields)
        .sort(query.sort)
        .exec(cb);
 }
 
-function plainSearch (query, cb) {
-    UrlModel.find(query, cb);
-}
-
 function search (request, reply) {
-    var userId = request.params.userId
-      , query  = request.query || {}
-      , searchFn = query.search ? textSearch : plainSearch;
+    var userId   = request.params.userId
+      , reqQuery = request.query || {}
+      , urlQuery = new UrlQuery(reqQuery.search);
 
-    query.userId = userId;
-    searchFn(query, function (err, urls) {
+    urlQuery.criteria.userId = userId;
+    urlQuery.addSort(reqQuery.sort);
+
+    searchDb(urlQuery, function (err, urls) {
         if (err) {
             return reply.boom(err);
         } else {
