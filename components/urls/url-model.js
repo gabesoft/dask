@@ -25,6 +25,7 @@ Url = new Schema({
   , userEntered : { type: String, required: true }
   , favicon     : { type: String, required: true }
   , title       : { type: String}
+  , clickCount  : { type: Number, required: true, default: 0 }
   , rank        : { type: Number }
   , notes       : { type: String }
   , tags        : { type: [String], index: true }
@@ -41,6 +42,8 @@ Url = new Schema({
       , transform : transform
     }
 });
+
+Url.index({ title: 'text', href: 'text', notes: 'text' });
 
 Url.pre('save', function (next) {
     if (this.isNew) {

@@ -89,12 +89,24 @@ function read (request, reply) {
     });
 }
 
+function textSearch (query, cb) {
+    var find   = { $text: { $search: query.search }, userId: query.userId }
+      , fields = { score: { $meta: 'textScore' } }
+      , sort   = { score: { $meta: 'textScore' } };
+    UrlModel.find(find, fields).sort(sort).exec(cb);
+}
+
+function plainSearch (query, cb) {
+    UrlModel.find(query, cb);
+}
+
 function search (request, reply) {
     var userId = request.params.userId
-      , query  = request.query || {};
+      , query  = request.query || {}
+      , searchFn = query.search ? textSearch : plainSearch;
 
     query.userId = userId;
-    UrlModel.find(query, function (err, urls) {
+    searchFn(query, function (err, urls) {
         if (err) {
             return reply.boom(err);
         } else {
@@ -108,5 +120,5 @@ module.exports = {
   , update : update
   , remove : remove
   , read   : read
-  , search   : search
+  , search : search
 };

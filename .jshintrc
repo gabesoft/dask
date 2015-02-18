@@ -1,8 +1,12 @@
 {
     "curly": true,
     "eqeqeq": true,
-    "node": true,
     "globalstrict": true,
     "laxbreak": true,
-    "laxcomma": true
+    "laxcomma": true,
+    "node": true,
+    "predef": [
+        "describe",
+        "it"
+    ]
 }

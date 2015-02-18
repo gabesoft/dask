@@ -27,7 +27,7 @@ tag-push: tag
 	@git push --tags origin HEAD:master
 
 test:
-	@NODE_ENV=test $(MOCHA) -R spec test/*.js --grep @slow --invert
+	@NODE_ENV=test $(MOCHA) -R spec test/**/*.js --grep @slow --invert
 
 test-slow:
 	@NODE_ENV=test $(MOCHA) -R spec test/*.js --grep @slow --timeout 10000
