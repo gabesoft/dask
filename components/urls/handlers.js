@@ -2,6 +2,7 @@
 
 var UrlModel            = require('./url-model')
   , RecordNotFoundError = require('../core/errors/record-not-found')
+  , UrlQuery            = require('./url-query').Query
   , urlUtil             = require('url');
 
 function saveTags (redis, url) {
@@ -89,11 +90,12 @@ function read (request, reply) {
     });
 }
 
-function textSearch (query, cb) {
-    var find   = { $text: { $search: query.search }, userId: query.userId }
-      , fields = { score: { $meta: 'textScore' } }
-      , sort   = { score: { $meta: 'textScore' } };
-    UrlModel.find(find, fields).sort(sort).exec(cb);
+function textSearch (params, cb) {
+    var query = new UrlQuery(params.search);
+    UrlModel
+       .find(query.criteria, query.fields)
+       .sort(query.sort)
+       .exec(cb);
 }
 
 function plainSearch (query, cb) {
