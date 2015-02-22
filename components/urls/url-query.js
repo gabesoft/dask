@@ -77,7 +77,13 @@ function toStr (criteria) {
 }
 
 Query.prototype.parse = function (input) {
-    this.ast = input ? parser.parse(input) : [];
+    try {
+        this.ast = input ? parser.parse(input) : [];
+    } catch (e) {
+        console.log('query parse failed');
+        console.log(input, e);
+        this.ast = [];
+    }
 };
 
 Query.prototype.toString = function () {

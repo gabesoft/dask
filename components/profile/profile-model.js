@@ -1,15 +1,9 @@
 'use strict';
 
-var mongoose  = require('mongoose')
-  , timestamp = require('../core/mongoose-plugins/timestamp')
-  , Schema    = mongoose.Schema
-  , Profile   = null;
-
-function transform (doc, ret, options) {
-    delete ret._id;
-    delete ret.__v;
-    return ret;
-}
+var mongoose = require('mongoose')
+  , Types    = mongoose.Schema.Types
+  , schema   = require('../core/lib/mongoose-schema')
+  , Profile  = null;
 
 function username () {
     var pat1 = Math.random().toString(36).slice(2)
@@ -17,31 +11,18 @@ function username () {
     return 'temp-display-name-' + pat1 + pat2;
 }
 
-Profile = new Schema({
+Profile = schema.create({
     displayName   : {
         type     : String
       , required : true
       , default  : username
       , index    : { unique : true }
     }
-  , userId        : { type: Schema.Types.ObjectId, ref: 'User', required: true }
+  , userId        : { type: Types.ObjectId, ref: 'User', required: true }
   , gravatarEmail : String
   , firstName     : String
   , lastName      : String
   , location      : String
-}, {
-    autoIndex : true
-  , id        : true
-  , _id       : true
-  , strict    : true
-  , toObject  : {
-        virtuals  : true
-      , getters   : true
-      , minimize  : true
-      , transform : transform
-    }
-});
-
-Profile.plugin(timestamp);
+}, null, true);
 
 module.exports = mongoose.model('Profile', Profile);

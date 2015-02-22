@@ -1,6 +1,7 @@
 'use strict';
 
 var UrlModel            = require('./url-model')
+  , QueryModel          = require('./query-model')
   , RecordNotFoundError = require('../core/errors/record-not-found')
   , UrlQuery            = require('./url-query').Query
   , urlUtil             = require('url');
@@ -90,11 +91,40 @@ function read (request, reply) {
     });
 }
 
+function saveQuery (query, urls, cb) {
+    if (!query.toString()) { return cb(); }
+
+    QueryModel.upsert({
+        expression  : query.toString()
+      , name        : query.toString()
+      , resultCount : urls.length
+      , userId      : query.criteria.userId
+    }, cb);
+}
+
 function searchDb (query, cb) {
     UrlModel
        .find(query.criteria, query.fields)
        .sort(query.sort)
-       .exec(cb);
+       .exec(function (err, urls) {
+            if (err) { return cb(err); }
+
+            saveQuery(query, urls, function () {
+                cb(null, urls);
+            });
+        });
+}
+
+function readUserQueries (request, reply) {
+    // TODO: move sort & limit defaults to config
+    //       and allow override
+    QueryModel
+       .find({ userId: request.params.userId })
+       .sort({ updatedAt: -1 })
+       .limit(100)
+       .exec(function (err, queries) {
+            return err ? reply.boom(err) : reply(queries);
+        });
 }
 
 function search (request, reply) {
@@ -115,9 +145,10 @@ function search (request, reply) {
 }
 
 module.exports = {
-    create : create
-  , update : update
-  , remove : remove
-  , read   : read
-  , search : search
+    create  : create
+  , update  : update
+  , remove  : remove
+  , read    : read
+  , search  : search
+  , queries : readUserQueries
 };

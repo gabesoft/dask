@@ -1,26 +1,14 @@
 'use strict';
 
-var mongoose  = require('mongoose')
-  , timestamp = require('../core/mongoose-plugins/timestamp')
-  , crypto    = require('crypto')
-  , Schema    = mongoose.Schema
-  , Url       = null;
+var mongoose = require('mongoose')
+  , md5      = require('../core/lib/md5-hash')
+  , Types    = mongoose.Schema.Types
+  , schema   = require('../core/lib/mongoose-schema')
+  , Url      = null;
 
-function transform (doc, ret, options) {
-    delete ret._id;
-    delete ret.__v;
-    return ret;
-}
-
-function hash (url) {
-    var userId = url.get('userId')
-      , href   = url.get('href');
-    return crypto.createHash('md5').update(userId + href).digest('hex');
-}
-
-Url = new Schema({
+Url = schema.create({
     _id         : { type: String }
-  , userId      : { type: Schema.Types.ObjectId, ref: 'User', required: true }
+  , userId      : { type: Types.ObjectId, ref: 'User', required: true }
   , href        : { type: String, required: true }
   , userEntered : { type: String, required: true }
   , favicon     : { type: String, required: true }
@@ -30,24 +18,13 @@ Url = new Schema({
   , notes       : { type: String }
   , tags        : { type: [String], index: true }
   , private     : { type: Boolean, required: true, default: false }
-}, {
-    autoIndex : true
-  , id        : true
-  , _id       : true
-  , strict    : true
-  , toObject  : {
-        virtuals  : true
-      , getters   : true
-      , minimize  : true
-      , transform : transform
-    }
-});
+}, null, true);
 
 Url.index({ title: 'text', href: 'text', notes: 'text' });
 
 Url.pre('save', function (next) {
     if (this.isNew) {
-        this.set('_id', hash(this));
+        this.set('_id', md5.create(this.get('userId'), this.get('href')));
     }
 
     var tags = this.get('tags') || []
@@ -61,7 +38,5 @@ Url.pre('save', function (next) {
 
     next();
 });
-
-Url.plugin(timestamp);
 
 module.exports = mongoose.model('Url', Url);
