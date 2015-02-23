@@ -92,7 +92,7 @@ function read (request, reply) {
 }
 
 function saveQuery (query, urls, cb) {
-    if (!query.toString()) { return cb(); }
+    if (!query.toString() || urls.length === 0) { return cb(); }
 
     QueryModel.upsert({
         expression  : query.toString()
@@ -116,12 +116,14 @@ function searchDb (query, cb) {
 }
 
 function readUserQueries (request, reply) {
+    var reqQuery = request.query || {};
     // TODO: move sort & limit defaults to config
     //       and allow override
+    //       consider storing queries in redis and cap to 100 records
     QueryModel
        .find({ userId: request.params.userId })
        .sort({ updatedAt: -1 })
-       .limit(100)
+       .limit(reqQuery.limit || 100)
        .exec(function (err, queries) {
             return err ? reply.boom(err) : reply(queries);
         });
