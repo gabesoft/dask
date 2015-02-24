@@ -1,21 +1,11 @@
 'use strict';
 
 var UrlModel            = require('./url-model')
+  , tagsModel           = require('../tags/model')
   , QueryModel          = require('./query-model')
   , RecordNotFoundError = require('../core/errors/record-not-found')
   , UrlQuery            = require('./url-query').Query
   , urlUtil             = require('url');
-
-function saveTags (redis, url) {
-    var tags = url.get('tags') || [];
-    if (tags.length > 0) {
-        redis.sadd('tags', tags, function (err, data) {
-            if (err) {
-                console.log('failed to save tags', tags, err);
-            }
-        });
-    }
-}
 
 function create (request, reply) {
     var url  = new UrlModel(request.payload || {})
@@ -24,7 +14,7 @@ function create (request, reply) {
       , requestUrl = request.url;
 
     url.on('save', function (doc) {
-        saveTags(redis, doc);
+        tagsModel.set(redis, userId, doc.get('tags'));
     });
 
     url.set({ userId: userId });
@@ -55,7 +45,7 @@ function update (request, reply) {
             reply.boom(new RecordNotFoundError('url', query));
         } else {
             url.on('save', function (doc) {
-                saveTags(redis, doc);
+                tagsModel.set(redis, userId, doc.get('tags'));
             });
 
             url.set(request.payload || {});
