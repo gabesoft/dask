@@ -1,7 +1,7 @@
 'use strict';
 
 var UrlModel            = require('./url-model')
-  , tagsModel           = require('../tags/model')
+  , tagsHelper           = require('../tags/helper')
   , QueryModel          = require('./query-model')
   , RecordNotFoundError = require('../core/errors/record-not-found')
   , UrlQuery            = require('./url-query').Query
@@ -14,7 +14,7 @@ function create (request, reply) {
       , requestUrl = request.url;
 
     url.on('save', function (doc) {
-        tagsModel.set(redis, userId, doc.get('tags'));
+        tagsHelper.set(redis, userId, doc.get('tags'));
     });
 
     url.set({ userId: userId });
@@ -45,7 +45,7 @@ function update (request, reply) {
             reply.boom(new RecordNotFoundError('url', query));
         } else {
             url.on('save', function (doc) {
-                tagsModel.set(redis, userId, doc.get('tags'));
+                tagsHelper.set(redis, userId, doc.get('tags'));
             });
 
             url.set(request.payload || {});

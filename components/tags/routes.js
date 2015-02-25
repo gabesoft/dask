@@ -1,12 +1,12 @@
 'use strict';
 
-var tagsModel = require('../tags/model');
+var tagsHelper = require('../tags/helper');
 
 function tags (request, reply) {
     var redis  = request.server.app.redis
       , userId = request.params.userId;
 
-    tagsModel.get(redis, userId, function (err, data) {
+    tagsHelper.get(redis, userId, function (err, data) {
         return err ? reply.boom(err) : reply(data);
     });
 }
