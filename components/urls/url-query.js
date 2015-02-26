@@ -108,7 +108,7 @@ Query.prototype.initSort = function () {
 Query.prototype.addSort = function (sort) {
     if (!sort) { return; }
 
-    sort = sort.split('/\s+/');
+    sort = sort.split(/\s+/);
     sort.forEach(function (s) {
         s = s.split(':');
         this.sort[s[0]] = (s[1] === 'desc') ? -1 : 1;
