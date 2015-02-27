@@ -115,5 +115,18 @@ Query.prototype.addSort = function (sort) {
     }.bind(this));
 };
 
+Query.prototype.addLimit = function (limit) {
+    if (limit) {
+        this.limit = +limit;
+    }
+};
+
+Query.prototype.addSkip = function (skip) {
+    if (skip) {
+        this.skip = +skip;
+    }
+};
+
+
 
 module.exports.Query = Query;

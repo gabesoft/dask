@@ -82,27 +82,39 @@ function read (request, reply) {
 }
 
 function saveQuery (query, urls, cb) {
-    if (!query.toString() || urls.length === 0) { return cb(); }
+    if (!query.toString()) { return cb(); }
 
-    QueryModel.upsert({
-        expression  : query.toString()
-      , name        : query.toString()
-      , resultCount : urls.length
-      , userId      : query.criteria.userId
-    }, cb);
+    var data = {
+            expression  : query.toString()
+          , name        : query.toString()
+          , resultCount : urls.length
+          , userId      : query.criteria.userId
+        };
+
+    if (urls.length === 0) {
+        QueryModel.delete(data, cb);
+    } else {
+        QueryModel.upsert(data, cb);
+    }
 }
 
 function searchDb (query, cb) {
-    UrlModel
-       .find(query.criteria, query.fields)
-       .sort(query.sort)
-       .exec(function (err, urls) {
-            if (err) { return cb(err); }
+    var dbQuery = UrlModel.find(query.criteria, query.fields).sort(query.sort);
 
-            saveQuery(query, urls, function () {
-                cb(null, urls);
-            });
+    if (query.limit) {
+        dbQuery = dbQuery.limit(query.limit);
+    }
+    if (query.skip) {
+        dbQuery = dbQuery.skip(query.skip);
+    }
+
+    dbQuery.exec(function (err, urls) {
+        if (err) { return cb(err); }
+
+        saveQuery(query, urls, function () {
+            cb(null, urls);
         });
+    });
 }
 
 function readUserQueries (request, reply) {
@@ -126,6 +138,8 @@ function search (request, reply) {
 
     urlQuery.criteria.userId = userId;
     urlQuery.addSort(reqQuery.sort);
+    urlQuery.addLimit(reqQuery.limit);
+    urlQuery.addSkip(reqQuery.skip);
 
     searchDb(urlQuery, function (err, urls) {
         if (err) {

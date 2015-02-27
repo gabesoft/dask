@@ -33,4 +33,8 @@ Query.statics.upsert = function (data, cb) {
     this.update(criteria, data, options, cb);
 };
 
+Query.statics.delete = function (data, cb) {
+    this.find({ _id: md5.create(data.userId, data.expression) }).remove(cb);
+};
+
 module.exports = mongoose.model('Query', Query);
