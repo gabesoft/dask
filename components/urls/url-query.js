@@ -100,7 +100,7 @@ Query.prototype.initCriteria = function () {
         return acc + (Boolean(c.$text) ? 1 : 0);
     });
     if (!this.error && this.textCount > 1) {
-        this.error = new InvalidQueryError("Too many text expressions", this.input);
+        this.error = new InvalidQueryError("Only one text expression is allowed", this.input);
     }
 };
 
