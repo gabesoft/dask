@@ -86,7 +86,6 @@ function saveQuery (query, urls, cb) {
 
     var data = {
             expression  : query.toString()
-          , name        : query.toString()
           , resultCount : urls.length
           , userId      : query.criteria.userId
         };

@@ -7,6 +7,16 @@ var mongoose  = require('mongoose')
   , schema    = require('../core/lib/mongoose-schema')
   , Query     = null;
 
+function queryName (name, expression) {
+    if (name) {
+        return name;
+    } else if (expression.match(/^\(/) && expression.match(/\)$/)) {
+        return expression.substr(1, expression.length - 2);
+    } else {
+        return expression;
+    }
+}
+
 Query = schema.create({
     _id         : { type: String }
   , userId      : { type: Types.ObjectId, ref: 'User', required: true }
@@ -20,7 +30,7 @@ Query = schema.create({
 Query.pre('save', function (next) {
     if (this.isNew) {
         this.set('_id', md5.create(this.get('userId'), this.get('expression')));
-        this.set('name', this.get('name') || this.get('expression'));
+        this.set('name', queryName(this.get('name'), this.get('expression')));
     }
     next();
 });
@@ -28,8 +38,11 @@ Query.pre('save', function (next) {
 Query.statics.upsert = function (data, cb) {
     var criteria = { _id: md5.create(data.userId, data.expression) }
       , options  = { upsert: true, multi: false, strict: true };
+
     data.updatedAt = Date.now();
+    data.name = queryName(data.name, data.expression);
     data.$setOnInsert = { createdAt: Date.now() };
+
     this.update(criteria, data, options, cb);
 };
 
