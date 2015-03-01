@@ -119,9 +119,6 @@ function searchDb (query, cb) {
 
 function readUserQueries (request, reply) {
     var reqQuery = request.query || {};
-    // TODO: move sort & limit defaults to config
-    //       and allow override
-    //       consider storing queries in redis and cap to 100 records
     QueryModel
        .find({ userId: request.params.userId })
        .sort({ updatedAt: -1 })
@@ -140,6 +137,10 @@ function search (request, reply) {
     urlQuery.addSort(reqQuery.sort);
     urlQuery.addLimit(reqQuery.limit);
     urlQuery.addSkip(reqQuery.skip);
+
+    if (urlQuery.error) {
+        return reply.boom(urlQuery.error);
+    }
 
     searchDb(urlQuery, function (err, urls) {
         if (err) {

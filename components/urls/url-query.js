@@ -1,9 +1,11 @@
 'use strict';
 
-var parser = require('./query-parser');
+var parser = require('./query-parser')
+  , InvalidQueryError = require('../core/errors/invalid-query');
 
 function Query (input) {
-    this.parse((input || '').trim());
+    this.input = (input || '').trim();
+    this.parse();
     this.initCriteria();
     this.initFields();
     this.initSort();
@@ -76,12 +78,11 @@ function toStr (criteria) {
     }
 }
 
-Query.prototype.parse = function (input) {
+Query.prototype.parse = function () {
     try {
-        this.ast = input ? parser.parse(input) : [];
+        this.ast = this.input ? parser.parse(this.input) : [];
     } catch (e) {
-        console.log('query parse failed');
-        console.log(input, e);
+        this.error = new InvalidQueryError(e.message, this.input);
         this.ast = [];
     }
 };
@@ -95,6 +96,12 @@ Query.prototype.initCriteria = function () {
     this.textSearch = reduce(this.criteria, false, function (acc, c) {
         return acc || (c && Boolean(c.$text));
     });
+    this.textCount = reduce(this.criteria, 0, function (acc, c) {
+        return acc + (Boolean(c.$text) ? 1 : 0);
+    });
+    if (!this.error && this.textCount > 1) {
+        this.error = new InvalidQueryError("Too many text expressions", this.input);
+    }
 };
 
 Query.prototype.initFields = function () {

@@ -14,7 +14,7 @@ module.exports = [{
     method  : [ 'PUT', 'PATCH' ]
   , path    : '/users/{id}'
   , handler : handler.update
-}, , {
+}, {
     method  : 'GET'
   , path    : '/users/{id}'
   , handler : handler.read

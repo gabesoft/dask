@@ -1,3 +1,5 @@
+'use strict';
+
 var handler = require('./handlers');
 
 module.exports = [{
