@@ -10,7 +10,7 @@ var mongoose  = require('mongoose')
 function queryName (name, expression) {
     if (name) {
         return name;
-    } else if (expression.match(/^\(/) && expression.match(/\)$/)) {
+    } else if (expression && expression.match(/^\(/) && expression.match(/\)$/)) {
         return expression.substr(1, expression.length - 2);
     } else {
         return expression;
