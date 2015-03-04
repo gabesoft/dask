@@ -9,12 +9,7 @@ function set (redis, userId, tags, cb) {
     tags = tags || [];
 
     if (tags.length > 0) {
-        redis.sadd(key(userId), tags, function (err, data) {
-            if (err) {
-                console.log('failed to save tags', tags, err);
-            }
-            cb(err, data);
-        });
+        redis.sadd(key(userId), tags, cb);
     }
 }
 
@@ -22,7 +17,12 @@ function get (redis, userId, cb) {
     redis.smembers(key(userId), cb);
 }
 
+function remove (redis, userId, tag, cb) {
+    redis.srem(key(userId), tag, cb);
+}
+
 module.exports = {
-    set : set
-  , get : get
+    set    : set
+  , get    : get
+  , remove : remove
 };
