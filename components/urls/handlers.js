@@ -1,7 +1,7 @@
 'use strict';
 
 var UrlModel            = require('./url-model')
-  , tagsHelper           = require('../tags/helper')
+  , tagsHelper          = require('../tags/helper')
   , QueryModel          = require('./query-model')
   , RecordNotFoundError = require('../core/errors/record-not-found')
   , UrlQuery            = require('./url-query').Query

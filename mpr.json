@@ -1,13 +1,24 @@
 {
-    "server":{
-        "command": "node-dev",
-        "color": "grey",
-        "args" : ["server.js", "--port", "8006"],
-        "env": {}
-    },
-    "mongo":{
-        "command": "mongod",
+    "mongo": {
+        "args": [
+            "--config",
+            "/usr/local/etc/mongod.conf"
+        ],
         "color": "green",
-        "args" : ["--config", "/usr/local/etc/mongod.conf"]
+        "command": "mongod"
+    },
+    "redis": {
+        "color": "yellow",
+        "command": "redis-server"
+    },
+    "server": {
+        "args": [
+            "server.js",
+            "--port",
+            "8006"
+        ],
+        "color": "grey",
+        "command": "node-dev",
+        "env": {}
     }
 }

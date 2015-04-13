@@ -1,11 +1,10 @@
 'use strict';
 
-var mongoose  = require('mongoose')
-  , md5       = require('../core/lib/md5-hash')
-  , timestamp = require('../core/mongoose-plugins/timestamp')
-  , Types     = mongoose.Schema.Types
-  , schema    = require('../core/lib/mongoose-schema')
-  , Query     = null;
+var mongoose = require('mongoose')
+  , md5      = require('../core/lib/md5-hash')
+  , Types    = mongoose.Schema.Types
+  , schema   = require('../core/lib/mongoose-schema')
+  , Query    = null;
 
 function queryName (name, expression) {
     if (name) {
