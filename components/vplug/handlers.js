@@ -27,7 +27,7 @@ function remove (request, reply) {
 }
 
 function search (request, reply) {
-    Vplug.find({}).exec(function (err, items) {
+    Vplug.find({}).sort({githubStarCount : -1}).exec(function (err, items) {
         return err ? reply.boom(err) : reply(items);
     });
 }
