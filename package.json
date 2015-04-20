@@ -12,11 +12,11 @@
     "good": "^5.1.0",
     "good-console": "git+https://github.com/gabesoft/good-console.git",
     "hapi": "^8.0.0",
-    "hiredis": "^0.1.17",
+    "hiredis": "^0.3.0",
     "http-status-decorator": "0.0.1",
     "joi": "^5.0.2",
     "moment": "^2.8.4",
-    "mongoose": "^3.8.21",
+    "mongoose": "^4.0.1",
     "nconf": "^0.7.1",
     "redis": "^0.12.1"
   },
