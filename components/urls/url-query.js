@@ -1,15 +1,15 @@
 'use strict';
 
-var parser = require('./query-parser')
+var parser            = require('./query-parser')
+  , DataQuery         = require('../core/lib/data-query').DataQuery
+  , util              = require('util')
   , InvalidQueryError = require('../core/errors/invalid-query');
 
-function Query (input) {
-    this.input = (input || '').trim();
-    this.parse();
-    this.initCriteria();
-    this.initFields();
-    this.initSort();
+function Query () {
+    Query.super_.call(this);
 }
+
+util.inherits(Query, DataQuery);
 
 function tag (str) {
     return { tags: str };
@@ -78,7 +78,16 @@ function toStr (criteria) {
     }
 }
 
-Query.prototype.parse = function () {
+Query.prototype.parse = function (input) {
+    this.input = (input || '').trim();
+    this._parse();
+    this._initCriteria();
+    this._initFields();
+    this._initSort();
+};
+
+
+Query.prototype._parse = function () {
     try {
         this.ast = this.input ? parser.parse(this.input) : [];
     } catch (e) {
@@ -91,7 +100,7 @@ Query.prototype.toString = function () {
     return toStr(this.criteria);
 };
 
-Query.prototype.initCriteria = function () {
+Query.prototype._initCriteria = function () {
     this.criteria = criteria(this.ast) || {};
     this.textSearch = reduce(this.criteria, false, function (acc, c) {
         return acc || (c && Boolean(c.$text));
@@ -104,36 +113,16 @@ Query.prototype.initCriteria = function () {
     }
 };
 
-Query.prototype.initFields = function () {
-    this.fields = this.textSearch ? { score: { $meta: 'textScore' } } : {};
-};
-
-Query.prototype.initSort = function () {
-    this.sort = this.textSearch ? { score: { $meta: 'textScore' } } : {};
-};
-
-Query.prototype.addSort = function (sort) {
-    if (!sort) { return; }
-
-    sort = sort.split(/\s+/);
-    sort.forEach(function (s) {
-        s = s.split(':');
-        this.sort[s[0]] = (s[1] === 'desc') ? -1 : 1;
-    }.bind(this));
-};
-
-Query.prototype.addLimit = function (limit) {
-    if (limit) {
-        this.limit = +limit;
+Query.prototype._initFields = function () {
+    if (this.textSearch) {
+        this.addField('score', { $meta: 'textScore' });
     }
 };
 
-Query.prototype.addSkip = function (skip) {
-    if (skip) {
-        this.skip = +skip;
+Query.prototype._initSort = function () {
+    if (this.textSearch) {
+        this.addSort('score', { $meta: 'textScore' });
     }
 };
-
-
 
 module.exports.Query = Query;

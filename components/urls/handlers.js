@@ -98,16 +98,7 @@ function saveQuery (query, urls, cb) {
 }
 
 function searchDb (query, cb) {
-    var dbQuery = UrlModel.find(query.criteria, query.fields).sort(query.sort);
-
-    if (query.limit) {
-        dbQuery = dbQuery.limit(query.limit);
-    }
-    if (query.skip) {
-        dbQuery = dbQuery.skip(query.skip);
-    }
-
-    dbQuery.exec(function (err, urls) {
+    query.getQuery(UrlModel).exec(function (err, urls) {
         if (err) { return cb(err); }
 
         saveQuery(query, urls, function () {
@@ -130,10 +121,11 @@ function readUserQueries (request, reply) {
 function search (request, reply) {
     var userId   = request.params.userId
       , reqQuery = request.query || {}
-      , urlQuery = new UrlQuery(reqQuery.search);
+      , urlQuery = new UrlQuery();
 
+    urlQuery.parse(reqQuery.search);
     urlQuery.criteria.userId = userId;
-    urlQuery.addSort(reqQuery.sort);
+    urlQuery.parseSort(reqQuery.sort);
     urlQuery.addLimit(reqQuery.limit);
     urlQuery.addSkip(reqQuery.skip);
 

@@ -1,8 +1,9 @@
 'use strict';
 
-var Vplug    = require('./vplug-model')
-  , NotFound = require('../core/errors/record-not-found')
-  , url      = require('url');
+var Vplug     = require('./vplug-model')
+  , NotFound  = require('../core/errors/record-not-found')
+  , DataQuery = require('../core/lib/data-query').DataQuery
+  , url       = require('url');
 
 function create (request, reply) {
     var plug = new Vplug(request.payload || {})
@@ -27,7 +28,15 @@ function remove (request, reply) {
 }
 
 function search (request, reply) {
-    Vplug.find({}).sort({githubStarCount : -1}).exec(function (err, items) {
+    var reqQuery  = request.query || {}
+      , dataQuery = new DataQuery();
+
+    dataQuery.parseSort(reqQuery.sort);
+    dataQuery.addLimit(reqQuery.limit);
+    dataQuery.addSkip(reqQuery.skip);
+    dataQuery.andTextCriteria(reqQuery.search);
+
+    dataQuery.getQuery(Vplug).exec(function (err, items) {
         return err ? reply.boom(err) : reply(items);
     });
 }
