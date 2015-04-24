@@ -22,7 +22,7 @@ DataQuery.prototype._or = function () {
 DataQuery.prototype._setTextCriteria = function (search, op) {
     if (!search) return;
 
-    this.sort.score   = { $meta : 'textScore'};
+    this.sort         = { score : { $meta : 'textScore'} };
     this.fields.score = { $meta : 'textScore'};
     this[op + 'Criteria']('$text', { $search : search});
 };
