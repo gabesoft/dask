@@ -44,9 +44,7 @@ DataQuery.prototype.getQuery = function (model) {
         query.limit(this.limit);
     }
 
-    if (this.skip) {
-        query.limit(this.limit);
-    }
+    query.skip(this.skip || 0);
 
     return query;
 }
