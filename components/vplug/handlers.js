@@ -5,19 +5,47 @@ var Vplug     = require('./vplug-model')
   , DataQuery = require('../core/lib/data-query').DataQuery
   , url       = require('url');
 
-function create (request, reply) {
-    var plug = new Vplug(request.payload || {})
-      , rurl = request.url;
+function findOrCreate (opts, cb) {
+    if (opts) {
+        Vplug.findOne(opts, cb);
+    } else {
+        cb(null, new Vplug({}));
+    }
+}
 
-    plug.save(function (err) {
-        if (err && err.code === 11000) {
-            reply.conflict(err);
-        } else if (err) {
-            reply.boom(err);
-        } else {
-            rurl.pathname = [ rurl.pathname, plug.id ].join('/');
-            reply.created(plug.toObject(), url.format(rurl));
+function create (request, reply) {
+    var data  = request.payload || {}
+      , rurl  = request.url
+      , isNew = false
+      , opts  = {};
+
+    if (data.githubUrl) {
+        opts.githubUrl = data.githubUrl;
+    } else if (opts.vimorgUrl) {
+        opts.vimorgUrl = data.vimorgUrl;
+    } else {
+        opts = null;
+    }
+
+    findOrCreate(opts, function (err, plug) {
+        if (err) {
+            return reply.boom(err);
         }
+
+        isNew = Boolean(plug.id);
+        plug.set(data);
+        plug.save(function (err) {
+            if (err && err.code === 11000) {
+                reply.conflict(err);
+            } else if (err) {
+                reply.boom(err);
+            } else if (isNew) {
+                rurl.pathname = [ rurl.pathname, plug.id ].join('/');
+                reply.created(plug.toObject(), url.format(rurl));
+            } else {
+                reply(plug.toObject());
+            }
+        });
     });
 }
 
