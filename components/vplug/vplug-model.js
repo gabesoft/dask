@@ -9,7 +9,7 @@ var mongoose = require('mongoose')
  * Model that represents a vim plugin
  */
 Vplug = schema.create({
-    author          : { type : String }
+    author          : { type : Object }
   , description     : { type : String }
   , githubStarCount : { type : Number }
   , githubUrl       : { type : String, index: { unique: true, sparse: true } }
