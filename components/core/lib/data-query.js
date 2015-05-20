@@ -20,7 +20,7 @@ DataQuery.prototype._or = function () {
 };
 
 DataQuery.prototype._setTextCriteria = function (search, op) {
-    if (!search) return;
+    if (!search) { return; }
 
     this.sort         = { score : { $meta : 'textScore'} };
     this.fields.score = { $meta : 'textScore'};
@@ -47,7 +47,7 @@ DataQuery.prototype.getQuery = function (model) {
     query.skip(this.skip || 0);
 
     return query;
-}
+};
 
 /**
  * Adds the specified limit

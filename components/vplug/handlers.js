@@ -32,7 +32,11 @@ function create (request, reply) {
             return reply.boom(err);
         }
 
-        isNew = Boolean(plug.id);
+        if (!plug) {
+            isNew = true;
+            plug  = new Vplug();
+        }
+
         plug.set(data);
         plug.save(function (err) {
             if (err && err.code === 11000) {

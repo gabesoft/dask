@@ -16,6 +16,9 @@ Vplug = schema.create({
   , name            : { type : String }
   , tags            : { type : [String], index: true }
   , vimorgUrl       : { type : String, index: { unique: true, sparse: true } }
+  , readme          : { type : Object }
+  , doc             : { type : Object }
+  , isPlugin        : { type : Boolean }
 });
 
 Vplug.index({
@@ -24,6 +27,11 @@ Vplug.index({
     , githubUrl   : 'text'
     , name        : 'text'
     , tags        : 'text'
+});
+
+Vplug.pre('save', function (next) {
+    this.set('isPlugin', Boolean(this.get('doc')));
+    next();
 });
 
 module.exports = mongoose.model('Vplug', Vplug);

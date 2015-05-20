@@ -18,7 +18,7 @@ function removeTag (request, reply) {
 
     tagsHelper.remove(redis, userId, tag, function (err, data) {
         return err ? reply.boom(err) : reply(data);
-    })
+    });
 }
 
 module.exports = [{

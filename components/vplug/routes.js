@@ -25,7 +25,7 @@ function getKeywords (request, reply) {
     var redis = request.server.app.redis;
 
     redis.keys(makeKey('*'), function (err, keys) {
-        if (err) return reply.boom(err);
+        if (err) { return reply.boom(err); }
 
         redis.mget(keys, function (err, data) {
             return err ? reply.boom(err) : reply(data.map(JSON.parse));
@@ -57,4 +57,4 @@ module.exports = [{
     method  : 'GET'
   , path    : '/vplugkeywords'
   , handler : getKeywords
-}]
+}];
