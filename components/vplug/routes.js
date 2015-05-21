@@ -27,8 +27,24 @@ function getKeywords (request, reply) {
     redis.keys(makeKey('*'), function (err, keys) {
         if (err) { return reply.boom(err); }
 
+        if (keys.length === 0) { return reply(); }
+
         redis.mget(keys, function (err, data) {
             return err ? reply.boom(err) : reply(data.map(JSON.parse));
+        });
+    });
+}
+
+function delKeywords (request, reply) {
+    var redis = request.server.app.redis;
+
+    redis.keys(makeKey('*'), function (err, keys) {
+        if (err) { return reply.boom(err); }
+
+        if (keys.length === 0) { return reply(); }
+
+        redis.del(keys, function(err, res) {
+            return err ? reply.boom(err) : reply(res);
         });
     });
 }
@@ -53,6 +69,10 @@ module.exports = [{
     method  : 'POST'
   , path    : '/vplugkeywords'
   , handler : setKeywords
+}, {
+    method  : 'DELETE'
+  , path    : '/vplugkeywords'
+  , handler : delKeywords
 }, {
     method  : 'GET'
   , path    : '/vplugkeywords'

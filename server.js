@@ -75,8 +75,8 @@ function registerPlugins (cb) {
     }, {
         register : require('good')
       , options  : {
-            logRequestPayload  : true
-          , logResponsePayload : true
+            logRequestPayload  : false
+          , logResponsePayload : false
           , reporters          : [{
                 reporter : require('good-console')
               , args     : [
