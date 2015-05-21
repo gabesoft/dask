@@ -61,6 +61,7 @@ function remove (request, reply) {
 
 function search (request, reply) {
     var reqQuery  = request.query || {}
+      , fields    = (reqQuery.fields || '').split('~').filter(Boolean)
       , dataQuery = new DataQuery();
 
     dataQuery.parseSort(reqQuery.sort);
@@ -68,8 +69,18 @@ function search (request, reply) {
     dataQuery.addSkip(reqQuery.skip);
     dataQuery.andTextCriteria(reqQuery.search);
 
+    fields.forEach(function (field) {
+        dataQuery.addField(field, 1);
+    });
+
+    if (reqQuery.isPlugin) {
+        dataQuery.andCriteria('isPlugin', reqQuery.isPlugin);
+    }
+
     dataQuery.getQuery(Vplug).exec(function (err, items) {
-        return err ? reply.boom(err) : reply(items);
+        return err ? reply.boom(err) : reply(items.map(function (item) {
+            return item.toObject();
+        }));
     });
 }
 

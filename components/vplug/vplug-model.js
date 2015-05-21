@@ -1,7 +1,6 @@
 'use strict';
 
 var mongoose = require('mongoose')
-  , Types    = mongoose.Schema.Types
   , schema   = require('../core/lib/mongoose-schema')
   , Vplug    = null;
 
@@ -18,7 +17,7 @@ Vplug = schema.create({
   , vimorgUrl       : { type : String, index: { unique: true, sparse: true } }
   , readme          : { type : Object }
   , doc             : { type : Object }
-  , isPlugin        : { type : Boolean }
+  , isPlugin        : { type : Boolean, default : false  }
 });
 
 Vplug.index({
@@ -30,7 +29,7 @@ Vplug.index({
 });
 
 Vplug.pre('save', function (next) {
-    this.set('isPlugin', Boolean(this.get('doc')));
+    this.set('isPlugin', Boolean((this.get('doc') || {}).content));
     next();
 });
 
