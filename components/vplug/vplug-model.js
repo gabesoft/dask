@@ -21,11 +21,12 @@ Vplug = schema.create({
 });
 
 Vplug.index({
-      author      : 'text'
-    , description : 'text'
-    , githubUrl   : 'text'
-    , name        : 'text'
-    , tags        : 'text'
+    'author.name'  : 'text'
+  , 'author.login' : 'text'
+  , description    : 'text'
+  , githubUrl      : 'text'
+  , name           : 'text'
+  , tags           : 'text'
 });
 
 Vplug.pre('save', function (next) {
