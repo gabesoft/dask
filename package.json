@@ -15,7 +15,7 @@
     "http-status-decorator": "0.0.1",
     "joi": "^5.0.2",
     "moment": "^2.8.4",
-    "mongoose": "^4.0.2",
+    "mongoose": "^4.0.3",
     "nconf": "^0.7.1",
     "redis": "^0.12.1"
   },
