@@ -84,6 +84,21 @@ function search (request, reply) {
     });
 }
 
+function read (request, reply) {
+    var id     = request.params.id
+      , query  = { _id: id };
+
+    Vplug.findOne(query, function (err, plug) {
+        if (err) {
+            reply.boom(err);
+        } else if (!plug) {
+            reply.boom(new RecordNotFoundError('plug', query));
+        } else {
+            reply(plug.toObject());
+        }
+    });
+}
+
 function update (request, reply) {
     var query = { _id: request.params.id };
 
@@ -106,4 +121,5 @@ module.exports = {
   , update : update
   , remove : remove
   , search : search
+  , read   : read
 };

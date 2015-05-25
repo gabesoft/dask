@@ -58,6 +58,10 @@ module.exports = [{
   , path    : '/vplugs'
   , handler : handler.search
 }, {
+    method  : 'GET'
+  , path    : '/vplugs/{id}'
+  , handler : handler.read
+}, {
     method  : 'DELETE'
   , path    : '/vplugs/{id}'
   , handler : handler.remove
