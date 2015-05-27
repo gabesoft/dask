@@ -64,6 +64,7 @@ function search (request, reply) {
       , fields    = (reqQuery.fields || '').split('~').filter(Boolean)
       , dataQuery = new DataQuery();
 
+    // TODO: add total count
     dataQuery.parseSort(reqQuery.sort);
     dataQuery.addLimit(reqQuery.limit);
     dataQuery.addSkip(reqQuery.skip);

@@ -17,7 +17,8 @@ Vplug = schema.create({
   , vimorgUrl       : { type : String, index: { unique: true, sparse: true } }
   , readme          : { type : Object }
   , doc             : { type : Object }
-  , isPlugin        : { type : Boolean, default : false  }
+  , hasDoc          : { type : Boolean, default : false  }
+  , hasReadme       : { type : Boolean, default : false }
 });
 
 Vplug.index({
@@ -30,7 +31,8 @@ Vplug.index({
 });
 
 Vplug.pre('save', function (next) {
-    this.set('isPlugin', Boolean((this.get('doc') || {}).content));
+    this.set('hasDoc', Boolean((this.get('doc') || {}).content));
+    this.set('hasReadme', Boolean((this.get('readme') || {}).content));
     next();
 });
 
