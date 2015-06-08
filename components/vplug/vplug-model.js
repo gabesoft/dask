@@ -11,6 +11,7 @@ Vplug = schema.create({
     author          : { type : Object }
   , description     : { type : String }
   , githubStarCount : { type : Number }
+  , isPlugin        : { type : Number, default : 0 }
   , githubUrl       : { type : String, index: { unique: true, sparse: true } }
   , name            : { type : String }
   , tags            : { type : [String], index: true }
