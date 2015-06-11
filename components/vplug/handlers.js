@@ -93,7 +93,7 @@ function read (request, reply) {
         if (err) {
             reply.boom(err);
         } else if (!plug) {
-            reply.boom(new RecordNotFoundError('plug', query));
+            reply.boom(new NotFound('plug', query));
         } else {
             reply(plug.toObject());
         }
