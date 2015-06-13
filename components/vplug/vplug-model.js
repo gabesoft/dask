@@ -30,7 +30,7 @@ Vplug.index({
     'author.name'  : 'text'
   , 'author.login' : 'text'
   , description    : 'text'
-  , githubUrl      : 'text'
+  , githubHtmlUrl      : 'text'
   , name           : 'text'
   , tags           : 'text'
 });

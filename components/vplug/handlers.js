@@ -19,8 +19,8 @@ function create (request, reply) {
       , isNew = false
       , opts  = {};
 
-    if (data.githubUrl) {
-        opts.githubUrl = data.githubUrl;
+    if (data.githubHtmlUrl) {
+        opts.githubHtmlUrl = data.githubHtmlUrl;
     } else if (opts.vimorgUrl) {
         opts.vimorgUrl = data.vimorgUrl;
     } else {
