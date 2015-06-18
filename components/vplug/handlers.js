@@ -75,7 +75,7 @@ function search (request, reply) {
     });
 
     if (reqQuery.isPlugin) {
-        dataQuery.andCriteria('isPlugin', reqQuery.isPlugin);
+        dataQuery.andCriteria('isPlugin', reqQuery.isPlugin, 'gt');
     }
 
     dataQuery.getQuery(Vplug).exec(function (err, items) {

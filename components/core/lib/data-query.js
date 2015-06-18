@@ -19,6 +19,22 @@ DataQuery.prototype._or = function () {
     return { $or: Array.prototype.slice.call(arguments) };
 };
 
+DataQuery.prototype._gt = function (value) {
+    return { $gt : value };
+};
+
+DataQuery.prototype._lt = function (value) {
+    return { $lt : value };
+};
+
+DataQuery.prototype._gte = function (value) {
+    return { $gte : value };
+};
+
+DataQuery.prototype._lte = function (value) {
+    return { $lte : value };
+};
+
 DataQuery.prototype._setTextCriteria = function (search, op) {
     if (!search) { return; }
 
@@ -94,10 +110,11 @@ DataQuery.prototype.orTextCriteria = function (search) {
  *
  * @param {String} name - the criteria name
  * @param {String} value - the criteria value
+ * @param {String} op - operator (gt or lt)
  */
-DataQuery.prototype.andCriteria = function (name, value) {
+DataQuery.prototype.andCriteria = function (name, value, op) {
     var criteria = {};
-    criteria[name] = value;
+    criteria[name] = op ? this['_' + op](value) : value;
     this.criteria = util._extend(this.criteria, criteria);
 };
 
