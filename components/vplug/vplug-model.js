@@ -15,6 +15,7 @@ Vplug = schema.create({
   , githubCreatedAt : { type : Date }
   , githubHtmlUrl   : { type : String, index: { unique: true, sparse: true } }
   , githubPushedAt  : { type : Date }    // date and time of the last commit
+  , githubSshUrl    : { type : String }
   , githubStarCount : { type : Number }
   , githubUpdatedAt : { type : Date }    // date and time of the last change
   , hasDoc          : { type : Boolean, default : false  }
