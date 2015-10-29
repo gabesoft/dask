@@ -9,6 +9,7 @@
 
 .DS_Store
 .stat-test
+.tern-port
 
 NERD_tree_*
 lib-cov
