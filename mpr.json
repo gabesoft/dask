@@ -18,7 +18,8 @@
             "8006"
         ],
         "color": "grey",
-        "command": "node-dev",
+        "command": "node_modules/.bin/node-dev",
+        "resolvePath": true,
         "env": {}
     }
 }
