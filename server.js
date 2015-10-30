@@ -81,13 +81,8 @@ function registerPlugins(cb) {
         options: {
             reporters: [{
                 reporter: require('good-console'),
-                events: [{
-                    log: '*',
-                    response: '*',
-                    error: '*'
-                }, {
-                    format: 'hh:mm:ss.SSS'
-                }]
+                events: { log: '*', response: '*', error: '*' },
+                config: { format: 'hh:mm:ss.SSS' }
             }]
         }
     }], cb);
