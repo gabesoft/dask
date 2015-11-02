@@ -4,7 +4,7 @@
             "--config",
             "/usr/local/etc/mongod.conf"
         ],
-        "color": "green",
+        "color": "cyan",
         "command": "mongod"
     },
     "redis": {
@@ -17,7 +17,7 @@
             "--port",
             "8006"
         ],
-        "color": "grey",
+        "color": "magenta",
         "command": "node_modules/.bin/node-dev",
         "resolvePath": true,
         "env": {}
