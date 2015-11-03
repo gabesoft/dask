@@ -7,7 +7,6 @@ const mongoose = require('mongoose'),
  * Blog feed object schema
  */
 const Feed = schema.create({
-  _id: { type: String },
   title: { type: String },
   description: { type: String },
   uri: { type: String, required: true, index: { unique: true } },

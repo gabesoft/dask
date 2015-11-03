@@ -8,7 +8,6 @@ const mongoose = require('mongoose'),
  * Blog post object schema
  */
 const Post = schema.create({
-  _id: { type: String },
   feedId: { type: Types.ObjectId, ref: 'Feed', required: true },
   title: { type: String },
   description: { type: String },

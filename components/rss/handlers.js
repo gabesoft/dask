@@ -148,3 +148,4 @@ module.exports = {
   updateFeed: updateFeed,
   updatePost: updatePost
 };
+
