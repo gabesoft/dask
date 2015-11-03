@@ -12,50 +12,34 @@ function DataQuery() {
 }
 
 DataQuery.prototype._and = function() {
-  return {
-    $and: Array.prototype.slice.call(arguments)
-  };
+  return { $and: Array.prototype.slice.call(arguments) };
 };
 
 DataQuery.prototype._or = function() {
-  return {
-    $or: Array.prototype.slice.call(arguments)
-  };
+  return { $or: Array.prototype.slice.call(arguments) };
 };
 
 DataQuery.prototype._gt = function(value) {
-  return {
-    $gt: value
-  };
+  return { $gt: value };
 };
 
 DataQuery.prototype._lt = function(value) {
-  return {
-    $lt: value
-  };
+  return { $lt: value };
 };
 
 DataQuery.prototype._gte = function(value) {
-  return {
-    $gte: value
-  };
+  return { $gte: value };
 };
 
 DataQuery.prototype._lte = function(value) {
-  return {
-    $lte: value
-  };
+  return { $lte: value };
 };
 
 DataQuery.prototype._setTextCriteria = function(search, op) {
-  if (!search) {
-    return;
-  }
+  if (!search) { return; }
 
   this.sort = {
-    score: {
-      $meta: 'textScore'
-    }
+    score: { $meta: 'textScore' }
   };
   this.fields.score = {
     $meta: 'textScore'

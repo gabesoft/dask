@@ -75,6 +75,12 @@ function search(request, reply, Model) {
   const input = request.query || {},
         query = new DataQuery();
 
+  Model.schema.eachPath(path => {
+    if (input[path]) {
+      query.andCriteria(path, input[path]);
+    }
+  });
+
   query.parseSort(input.sort);
   query.addLimit(input.limit);
   query.addSkip(input.skip);
