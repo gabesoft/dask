@@ -2,7 +2,7 @@
 
 const FeedModel = require('./feed-model'),
       PostModel = require('./post-model'),
-      RecordNotFoundError = require('../core/errors/record-not-found'),
+      RecordNotFound = require('../core/errors/record-not-found'),
       DataQuery = require('../core/lib/data-query').DataQuery,
       url = require('url');
 
@@ -21,14 +21,15 @@ function create(request, reply, doc) {
   });
 }
 
-function update(request, reply, Model, modelName) {
+function update(request, reply, Model) {
+  const modelName = Model.modelName;
   const query = { _id: request.params.id };
 
   Model.findOne(query, (err, doc) => {
     if (err) {
       reply.boom(err);
     } else if (!doc) {
-      reply.boom(new RecordNotFoundError(modelName, query));
+      reply.boom(new RecordNotFound(modelName, query));
     } else {
       doc.set(request.payload || {});
       doc.save(saveErr => {
@@ -38,7 +39,8 @@ function update(request, reply, Model, modelName) {
   });
 }
 
-function remove(request, reply, Model, modelName, cb) {
+function remove(request, reply, Model, cb) {
+  const modelName = Model.modelName;
   Model.remove({ _id: request.params.id }, err => {
     cb(err);
 
@@ -55,7 +57,8 @@ function remove(request, reply, Model, modelName, cb) {
   });
 }
 
-function read(request, reply, Model, modelName) {
+function read(request, reply, Model) {
+  const modelName = Model.modelName;
   const query = { _id: request.params.id };
 
   Model.findOne(query, (err, doc) => {
@@ -64,7 +67,7 @@ function read(request, reply, Model, modelName) {
     } else if (err) {
       reply.boom(err);
     } else if (!doc) {
-      reply.boom(new RecordNotFoundError(modelName, query));
+      reply.boom(new RecordNotFound(modelName, query));
     } else {
       reply(doc.toObject());
     }
@@ -89,7 +92,7 @@ function search(request, reply, Model) {
     return reply.boom(query.error);
   }
 
-  query.getQuery(Model).exec((err, docs) => {
+  return query.getQuery(Model).exec((err, docs) => {
     if (err) {
       reply.boom(err);
     } else {
@@ -107,15 +110,15 @@ function createPost(request, reply) {
 }
 
 function readFeed(request, reply) {
-  read(request, reply, FeedModel, 'feed');
+  read(request, reply, FeedModel);
 }
 
 function readPost(request, reply) {
-  read(request, reply, PostModel, 'post');
+  read(request, reply, PostModel);
 }
 
 function removeFeed(request, reply) {
-  remove(request, reply, FeedModel, 'feed', (err) => {
+  remove(request, reply, FeedModel, (err) => {
     if (!err) {
       PostModel.remove({ feedId: request.params.id }, () => {});
     }
@@ -123,7 +126,7 @@ function removeFeed(request, reply) {
 }
 
 function removePost(request, reply) {
-  remove(request, reply, PostModel, 'post', () => {});
+  remove(request, reply, PostModel, () => {});
 }
 
 function searchFeeds(request, reply) {
@@ -135,11 +138,11 @@ function searchPosts(request, reply) {
 }
 
 function updateFeed(request, reply) {
-  update(request, reply, FeedModel, 'feed');
+  update(request, reply, FeedModel);
 }
 
 function updatePost(request, reply) {
-  update(request, reply, PostModel, 'post');
+  update(request, reply, PostModel);
 }
 
 module.exports = {

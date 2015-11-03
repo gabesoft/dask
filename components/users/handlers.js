@@ -1,8 +1,8 @@
 'use strict';
 
 const User = require('./user-model'),
-      RecordNotFoundError = require('../core/errors/record-not-found'),
-      GuidExpiredError = require('../core/errors/guid-expired'),
+      RecordNotFound = require('../core/errors/record-not-found'),
+      GuidExpired = require('../core/errors/guid-expired'),
       url = require('url');
 
 function create(request, reply) {
@@ -27,19 +27,19 @@ function create(request, reply) {
 function update(request, reply) {
   User.findOne({
     _id: request.params.id
-  }, (err, user) => {
-    if (err && err.name === 'CastError') {
-      return reply.badRequest(err);
-    } else if (err) {
-      return reply.boom(err);
+  }, (findErr, user) => {
+    if (findErr && findErr.name === 'CastError') {
+      return reply.badRequest(findErr);
+    } else if (findErr) {
+      return reply.boom(findErr);
     } else if (!user) {
-      return reply.boom(new RecordNotFoundError('user', request.params.id));
+      return reply.boom(new RecordNotFound(User.modelName, request.params.id));
     }
 
     user.set(request.payload || {});
-    user.save((err) => {
-      if (err) {
-        reply.boom(err);
+    return user.save(saveErr => {
+      if (saveErr) {
+        reply.boom(saveErr);
       } else {
         reply(user.toObject());
       }
@@ -54,9 +54,25 @@ function findOne(request, reply, query) {
     } else if (err) {
       reply.boom(err);
     } else if (!user) {
-      reply.boom(new RecordNotFoundError('user', query));
+      reply.boom(new RecordNotFound(User.modelName, query));
     } else {
       reply(user.toObject());
+    }
+  });
+}
+
+function findByGuid(request, reply) {
+  const guid = request.query.guid,
+        key = 'user-' + guid,
+        redis = request.server.app.redis;
+
+  redis.get(key, (err, userId) => {
+    if (err) {
+      reply.boom(err);
+    } else if (!userId) {
+      reply.boom(new GuidExpired(guid));
+    } else {
+      findOne(request, reply, { _id: userId });
     }
   });
 }
@@ -68,9 +84,7 @@ function find(request, reply, query) {
     } else if (err) {
       reply.boom(err);
     } else {
-      reply(users.map((u) => {
-        return u.toObject();
-      }));
+      reply(users.map(user => user.toObject()));
     }
   });
 }
@@ -92,7 +106,7 @@ function search(request, reply) {
 function remove(request, reply) {
   User.remove({
     _id: request.params.id
-  }, (err) => {
+  }, err => {
     if (err && err.name === 'CastError') {
       reply.badRequest(err);
     } else if (err) {
@@ -116,35 +130,17 @@ function link(request, reply) {
   redis.multi()
     .set(key, userId)
     .expire(key, ttlInSeconds)
-    .exec((err, result) => {
+    .exec(err => {
       if (err) {
-        return reply.boom(err);
+        reply.boom(err);
+      } else {
+        reply({
+          status: 'link-created',
+          userId: userId,
+          guid: guid
+        });
       }
-
-      reply({
-        status: 'link-created',
-        userId: userId,
-        guid: guid
-      });
     });
-}
-
-function findByGuid(request, reply) {
-  const guid = request.query.guid,
-        key = 'user-' + guid,
-        redis = request.server.app.redis;
-
-  redis.get(key, (err, userId) => {
-    if (err) {
-      reply.boom(err);
-    } else if (!userId) {
-      reply.boom(new GuidExpiredError(guid));
-    } else {
-      findOne(request, reply, {
-        _id: userId
-      });
-    }
-  });
 }
 
 module.exports = {
