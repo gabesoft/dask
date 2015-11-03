@@ -121,11 +121,11 @@ function removePost(request, reply) {
 }
 
 function searchFeeds(request, reply) {
-  search(request, reply, FeedsModel);
+  search(request, reply, FeedModel);
 }
 
 function searchPosts(request, reply) {
-  search(request, reply, PostsModel);
+  search(request, reply, PostModel);
 }
 
 function updateFeed(request, reply) {
