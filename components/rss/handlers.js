@@ -76,6 +76,7 @@ function read(request, reply, Model) {
 
 function search(request, reply, Model) {
   const input = request.query || {},
+        fields = (request.query.fields || '').split('~').filter(Boolean),
         query = new DataQuery();
 
   Model.schema.eachPath(path => {
@@ -87,6 +88,8 @@ function search(request, reply, Model) {
   query.parseSort(input.sort);
   query.addLimit(input.limit);
   query.addSkip(input.skip);
+
+  fields.forEach(field => query.addField(field, 1));
 
   if (query.error) {
     return reply.boom(query.error);
@@ -157,4 +160,3 @@ module.exports = {
   updateFeed: updateFeed,
   updatePost: updatePost
 };
-

@@ -8,19 +8,19 @@ const mongoose = require('mongoose'),
  * Blog post object schema
  */
 const Post = schema.create({
-  feedId: { type: Types.ObjectId, ref: 'Feed', required: true },
-  title: { type: String },
-  description: { type: String },
-  summary: { type: String },
-  comments: { type: String },
-  guid: { type: String, required: true, index: { unique: true } },
-  link: { type: String, required: true, index: { unique: true } },
   author: { type: String },
-  source: { type: String },
+  comments: { type: String },
   date: { type: Date },
-  pubdate: { type: Date },
+  description: { type: String },
+  feedId: { type: Types.ObjectId, ref: 'Feed', required: true },
+  guid: { type: String, required: true, index: { unique: true } },
   image: { type: Object },
-  tags: { type: [String], index: true }
+  link: { type: String, required: true, index: { unique: true } },
+  pubdate: { type: Date },
+  source: { type: Object },
+  summary: { type: String },
+  tags: { type: [String], index: true },
+  title: { type: String }
 });
 
 module.exports = mongoose.model('Post', Post);
