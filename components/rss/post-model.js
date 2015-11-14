@@ -24,11 +24,11 @@ const Post = schema.create({
 });
 
 Post.index({
-    author: 'text',
-    description: 'text',
-    link: 'text',
-    summary: 'text',
-    title: 'text'
+  author: 'text',
+  description: 'text',
+  link: 'text',
+  summary: 'text',
+  title: 'text'
 });
 
 module.exports = mongoose.model('Post', Post);
