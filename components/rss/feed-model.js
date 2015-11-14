@@ -7,17 +7,28 @@ const mongoose = require('mongoose'),
  * Blog feed object schema
  */
 const Feed = schema.create({
-  title: { type: String },
-  description: { type: String },
-  uri: { type: String, required: true, index: { unique: true } },
-  link: { type: String, required: true, index: { unique: true } },
   author: { type: String },
-  language: { type: String },
-  date: { type: Date },
-  image: { type: Object },
   data: { type: Object },
+  date: { type: Date },
+  description: { type: String },
   favicon: { type: String },
-  tags: { type: [String], index: true }
+  generator: { type: String },
+  image: { type: Object },
+  language: { type: String },
+  link: { type: String, required: true, index: { unique: true } },
+  tags: { type: [String], index: true },
+  title: { type: String },
+  uri: { type: String, required: true, index: { unique: true } },
+  userTitle: { type: String }
+});
+
+Feed.index({
+  author: 'text',
+  description: 'text',
+  link: 'text',
+  title: 'text',
+  uri: 'text',
+  userTitle: 'text'
 });
 
 module.exports = mongoose.model('Feed', Feed);
