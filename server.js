@@ -37,7 +37,7 @@ function setupServer(cb) {
   server.connection({
     port: conf.get('app:port') || 8006
   });
-  cb(null);
+  cb();
 }
 
 function loadRoutes(cb) {
