@@ -8,7 +8,7 @@ const User = schema.create({
   email: { type: String, required: true },
   meta: { type: Object },
   password: { type: String },
-  type: { type: String, required: true, default: 'ayne' }
+  type: { type: String, required: true }
 }, null, true);
 
 User.index({ email: 1, type: 1 }, { unique: true });
