@@ -1,45 +1,57 @@
 'use strict';
 
-const handler = require('./handlers');
+const handlers = require('./handlers');
 
 module.exports = [{
   method: 'POST',
   path: '/feeds',
-  handler: handler.createFeed
+  handler: handlers.createFeed
 }, {
   method: ['PUT', 'PATCH'],
   path: '/feeds/{id}',
-  handler: handler.updateFeed
+  handler: handlers.updateFeed
 }, {
   method: 'DELETE',
   path: '/feeds/{id}',
-  handler: handler.removeFeed
+  handler: handlers.removeFeed
 }, {
   method: 'GET',
   path: '/feeds/{id}',
-  handler: handler.readFeed
+  handler: handlers.readFeed
 }, {
   method: 'GET',
   path: '/feeds',
-  handler: handler.searchFeeds
+  handler: handlers.searchFeeds
 }, {
   method: 'POST',
   path: '/posts',
-  handler: handler.createPost
+  handler: handlers.createPost
 }, {
   method: ['PUT', 'PATCH'],
   path: '/posts/{id}',
-  handler: handler.updatePost
+  handler: handlers.updatePost
 }, {
   method: 'DELETE',
   path: '/posts/{id}',
-  handler: handler.removePost
+  handler: handlers.removePost
 }, {
   method: 'GET',
   path: '/posts/{id}',
-  handler: handler.readPost
+  handler: handlers.readPost
 }, {
   method: 'GET',
   path: '/posts',
-  handler: handler.searchPosts
-} ];
+  handler: handlers.searchPosts
+}, {
+  method: 'GET',
+  path: '/feed-subscriptions/{userId}',
+  handler: handlers.feedSubscriptions
+}, {
+  method: 'POST',
+  path: '/feed-subscriptions',
+  handler: handlers.createSubscription
+}, {
+  method: 'DELETE',
+  path: '/feed-subscriptions/{id}',
+  handler: handlers.removeSubscription
+}];

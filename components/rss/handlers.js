@@ -1,10 +1,25 @@
 'use strict';
 
 const FeedModel = require('./feed-model'),
+      FeedSubscriptionModel = require('./feed-subscription-model'),
       PostModel = require('./post-model'),
       RecordNotFound = require('../core/errors/record-not-found'),
       DataQuery = require('../core/lib/data-query').DataQuery,
       url = require('url');
+
+function returnSingleResult(reply, query, modelName) {
+  return (err, doc) => {
+    if (err && err.name === 'CastError') {
+      reply.badRequest(err);
+    } else if (err) {
+      reply.boom(err);
+    } else if (!doc) {
+      reply.boom(new RecordNotFound(modelName, query));
+    } else {
+      reply(doc.toObject());
+    }
+  };
+}
 
 function create(request, reply, doc) {
   doc.save(err => {
@@ -22,8 +37,8 @@ function create(request, reply, doc) {
 }
 
 function update(request, reply, Model) {
-  const modelName = Model.modelName;
-  const query = { _id: request.params.id };
+  const modelName = Model.modelName,
+        query = { _id: request.params.id };
 
   Model.findOne(query, (err, doc) => {
     if (err) {
@@ -32,9 +47,7 @@ function update(request, reply, Model) {
       reply.boom(new RecordNotFound(modelName, query));
     } else {
       doc.set(request.payload || {});
-      doc.save(saveErr => {
-        return saveErr ? reply.boom(err) : reply(doc.toObject());
-      });
+      doc.save(e => e ? reply.boom(e) : reply(doc.toObject()));
     }
   });
 }
@@ -58,21 +71,13 @@ function remove(request, reply, Model, cb) {
 }
 
 function read(request, reply, Model) {
-  const modelName = Model.modelName;
-  const query = { _id: request.params.id };
+  const modelName = Model.modelName,
+        query = { _id: request.params.id },
+        next = returnSingleResult(reply, query, modelName);
 
-  Model.findOne(query, (err, doc) => {
-    if (err && err.name === 'CastError') {
-      reply.badRequest(err);
-    } else if (err) {
-      reply.boom(err);
-    } else if (!doc) {
-      reply.boom(new RecordNotFound(modelName, query));
-    } else {
-      reply(doc.toObject());
-    }
-  });
+  Model.findOne(query, next);
 }
+
 
 function search(request, reply, Model) {
   const input = request.query || {},
@@ -148,13 +153,31 @@ function updatePost(request, reply) {
   update(request, reply, PostModel);
 }
 
+function feedSubscriptions(request, reply) {
+  const query = { userId: request.params.userId },
+        next = returnSingleResult(reply, query, 'FeedSubscription');
+
+  FeedSubscriptionModel.find(query, next);
+}
+
+function createSubscription(request, reply) {
+  create(request, reply, new FeedSubscriptionModel(request.payload || {}));
+}
+
+function removeSubscription(request, reply) {
+  remove(request, reply, FeedSubscriptionModel, () => {});
+}
+
 module.exports = {
   createFeed: createFeed,
   createPost: createPost,
+  createSubscription: createSubscription,
+  feedSubscriptions: feedSubscriptions,
   readFeed: readFeed,
   readPost: readPost,
   removeFeed: removeFeed,
   removePost: removePost,
+  removeSubscription: removeSubscription,
   searchFeeds: searchFeeds,
   searchPosts: searchPosts,
   updateFeed: updateFeed,
