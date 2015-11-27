@@ -157,7 +157,7 @@ function updatePost(request, reply) {
   update(request, reply, PostModel);
 }
 
-function feedSubscriptions(request, reply) {
+function findSubscriptions(request, reply, single) {
   const query = { userId: request.params.userId },
         next = returnFindResults(reply, query, 'FeedSubscription');
 
@@ -165,7 +165,19 @@ function feedSubscriptions(request, reply) {
     query.feedId = request.query.feedId;
   }
 
-  FeedSubscriptionModel.find(query, next);
+  if (request.params.feedId) {
+    query.feedId = request.params.feedId;
+  }
+
+  FeedSubscriptionModel[single ? 'findOne' : 'find'](query, next);
+}
+
+function feedSubscriptions(request, reply) {
+  findSubscriptions(request, reply, false);
+}
+
+function feedSubscription(request, reply) {
+  findSubscriptions(request, reply, true);
 }
 
 function createSubscription(request, reply) {
@@ -181,6 +193,7 @@ module.exports = {
   createPost: createPost,
   createSubscription: createSubscription,
   feedSubscriptions: feedSubscriptions,
+  feedSubscription: feedSubscription,
   readFeed: readFeed,
   readPost: readPost,
   removeFeed: removeFeed,

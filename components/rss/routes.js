@@ -47,6 +47,10 @@ module.exports = [{
   path: '/feed-subscriptions/{userId}',
   handler: handlers.feedSubscriptions
 }, {
+  method: 'GET',
+  path: '/feed-subscriptions/{userId}/{feedId}',
+  handler: handlers.feedSubscription
+}, {
   method: 'POST',
   path: '/feed-subscriptions',
   handler: handlers.createSubscription
