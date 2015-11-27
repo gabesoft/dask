@@ -5,6 +5,7 @@ const mongoose = require('mongoose'),
 
 const User = schema.create({
   disabled: { type: Boolean, required: true, default: false },
+  admin: { type: Boolean, required: true, default: false },
   email: { type: String, required: true },
   meta: { type: Object },
   password: { type: String },
