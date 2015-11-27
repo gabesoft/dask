@@ -161,6 +161,10 @@ function feedSubscriptions(request, reply) {
   const query = { userId: request.params.userId },
         next = returnFindResults(reply, query, 'FeedSubscription');
 
+  if (request.query.feedId) {
+    query.feedId = request.query.feedId;
+  }
+
   FeedSubscriptionModel.find(query, next);
 }
 
