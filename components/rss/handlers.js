@@ -7,7 +7,7 @@ const FeedModel = require('./feed-model'),
       DataQuery = require('../core/lib/data-query').DataQuery,
       url = require('url');
 
-function returnSingleResult(reply, query, modelName) {
+function returnFindResults(reply, query, modelName) {
   return (err, doc) => {
     if (err && err.name === 'CastError') {
       reply.badRequest(err);
@@ -16,7 +16,11 @@ function returnSingleResult(reply, query, modelName) {
     } else if (!doc) {
       reply.boom(new RecordNotFound(modelName, query));
     } else {
-      reply(doc.toObject());
+      if (Array.isArray(doc)) {
+        reply(doc.map(d => d.toObject()));
+      } else {
+        reply(doc.toObject());
+      }
     }
   };
 }
@@ -73,7 +77,7 @@ function remove(request, reply, Model, cb) {
 function read(request, reply, Model) {
   const modelName = Model.modelName,
         query = { _id: request.params.id },
-        next = returnSingleResult(reply, query, modelName);
+        next = returnFindResults(reply, query, modelName);
 
   Model.findOne(query, next);
 }
@@ -155,7 +159,7 @@ function updatePost(request, reply) {
 
 function feedSubscriptions(request, reply) {
   const query = { userId: request.params.userId },
-        next = returnSingleResult(reply, query, 'FeedSubscription');
+        next = returnFindResults(reply, query, 'FeedSubscription');
 
   FeedSubscriptionModel.find(query, next);
 }

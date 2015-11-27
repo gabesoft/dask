@@ -9,4 +9,6 @@ const FeedSubscription = schema.create({
   feedId: { type: Types.ObjectId, ref: 'Feed', required: true }
 });
 
+FeedSubscription.index({ userId: 1, feedId: 1 }, { unique: true });
+
 module.exports = mongoose.model('FeedSubscription', FeedSubscription);
