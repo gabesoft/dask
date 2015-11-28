@@ -44,6 +44,10 @@ module.exports = [{
   handler: handlers.searchPosts
 }, {
   method: 'GET',
+  path: '/feed-subscriptions',
+  handler: handlers.feedSubscriptions
+}, {
+  method: 'GET',
   path: '/feed-subscriptions/{userId}',
   handler: handlers.feedSubscriptions
 }, {

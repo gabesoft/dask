@@ -1,7 +1,7 @@
 'use strict';
 
 const FeedModel = require('./feed-model'),
-      FeedSubscriptionModel = require('./feed-subscription-model'),
+      FeedSubModel = require('./feed-subscription-model'),
       PostModel = require('./post-model'),
       RecordNotFound = require('../core/errors/record-not-found'),
       DataQuery = require('../core/lib/data-query').DataQuery,
@@ -131,9 +131,12 @@ function readPost(request, reply) {
 
 function removeFeed(request, reply) {
   remove(request, reply, FeedModel, (err) => {
-    if (!err) {
-      PostModel.remove({ feedId: request.params.id }, () => {});
+    if (err) {
+      return reply.boom(err);
     }
+
+    PostModel.remove({ feedId: request.params.id }, () => {});
+    FeedSubModel.remove({ feedId: request.params.id }, () => {});
   });
 }
 
@@ -158,8 +161,16 @@ function updatePost(request, reply) {
 }
 
 function findSubscriptions(request, reply, single) {
-  const query = { userId: request.params.userId },
+  const query = {},
         next = returnFindResults(reply, query, 'FeedSubscription');
+
+  if (request.query.userId) {
+    query.userId = request.query.userId;
+  }
+
+  if (request.params.userId) {
+    query.userId = request.params.userId;
+  }
 
   if (request.query.feedId) {
     query.feedId = request.query.feedId;
@@ -169,7 +180,7 @@ function findSubscriptions(request, reply, single) {
     query.feedId = request.params.feedId;
   }
 
-  FeedSubscriptionModel[single ? 'findOne' : 'find'](query, next);
+  FeedSubModel[single ? 'findOne' : 'find'](query, next);
 }
 
 function feedSubscriptions(request, reply) {
@@ -181,11 +192,11 @@ function feedSubscription(request, reply) {
 }
 
 function createSubscription(request, reply) {
-  create(request, reply, new FeedSubscriptionModel(request.payload || {}));
+  create(request, reply, new FeedSubModel(request.payload || {}));
 }
 
 function removeSubscription(request, reply) {
-  remove(request, reply, FeedSubscriptionModel, () => {});
+  remove(request, reply, FeedSubModel, () => {});
 }
 
 module.exports = {
