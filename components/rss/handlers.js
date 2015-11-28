@@ -94,7 +94,7 @@ function search(request, reply, Model) {
     }
   });
 
-  query.parseSort(input.sort);
+  query.parseSort(input.sort || 'date:desc');
   query.addLimit(input.limit);
   query.addSkip(input.skip);
 
