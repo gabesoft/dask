@@ -59,6 +59,10 @@ module.exports = [{
   path: '/feed-subscriptions',
   handler: handlers.createSubscription
 }, {
+  method: ['PUT', 'PATCH'],
+  path: '/feed-subscriptions/{id}',
+  handler: handlers.updateSubscription
+}, {
   method: 'DELETE',
   path: '/feed-subscriptions/{id}',
   handler: handlers.removeSubscription

@@ -160,6 +160,10 @@ function updatePost(request, reply) {
   update(request, reply, PostModel);
 }
 
+function updateSubscription(request, reply) {
+  update(request, reply, FeedSubModel);
+}
+
 function findSubscriptions(request, reply, single) {
   const query = {},
         next = returnFindResults(reply, query, 'FeedSubscription');
@@ -203,8 +207,8 @@ module.exports = {
   createFeed: createFeed,
   createPost: createPost,
   createSubscription: createSubscription,
-  feedSubscriptions: feedSubscriptions,
   feedSubscription: feedSubscription,
+  feedSubscriptions: feedSubscriptions,
   readFeed: readFeed,
   readPost: readPost,
   removeFeed: removeFeed,
@@ -213,5 +217,6 @@ module.exports = {
   searchFeeds: searchFeeds,
   searchPosts: searchPosts,
   updateFeed: updateFeed,
-  updatePost: updatePost
+  updatePost: updatePost,
+  updateSubscription: updateSubscription
 };
