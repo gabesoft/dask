@@ -50,7 +50,9 @@ function update(request, reply, Model) {
     } else if (!doc) {
       reply.boom(new RecordNotFound(modelName, query));
     } else {
-      doc.set(request.payload || {});
+      const data = request.payload || {};
+      data.tags = data.tags || [];
+      doc.set(data);
       doc.save(e => e ? reply.boom(e) : reply(doc.toObject()));
     }
   });

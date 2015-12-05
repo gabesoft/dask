@@ -1,32 +1,45 @@
 'use strict';
 
-var tagsHelper = require('../tags/helper');
+const tagsHelper = require('../tags/helper');
 
-function tags (request, reply) {
-    var redis  = request.server.app.redis
-      , userId = request.params.userId;
+function readTags(request, reply) {
+  const redis = request.server.app.redis,
+        userId = request.params.userId;
 
-    tagsHelper.get(redis, userId, function (err, data) {
-        return err ? reply.boom(err) : reply(data);
-    });
+  tagsHelper.get(redis, userId, (err, data) => {
+    return err ? reply.boom(err) : reply(data);
+  });
 }
 
-function removeTag (request, reply) {
-    var redis  = request.server.app.redis
-      , userId = request.params.userId
-      , tag    = request.params.tag;
+function saveTags(request, reply) {
+  const redis = request.server.app.redis,
+        userId = request.params.userId;
 
-    tagsHelper.remove(redis, userId, tag, function (err, data) {
-        return err ? reply.boom(err) : reply(data);
-    });
+  tagsHelper.set(redis, userId, request.payload, (err, data) => {
+    return err ? reply.boom(err) : reply(data);
+  });
+}
+
+function removeTag(request, reply) {
+  const redis = request.server.app.redis,
+        userId = request.params.userId,
+        tag = request.params.tag;
+
+  tagsHelper.remove(redis, userId, tag, (err, data) => {
+    return err ? reply.boom(err) : reply(data);
+  });
 }
 
 module.exports = [{
-    method  : 'GET'
-  , path    : '/users/{userId}/tags'
-  , handler : tags
+  method: 'GET',
+  path: '/users/{userId}/tags',
+  handler: readTags
 }, {
-    method  : 'DELETE'
-  , path    : '/users/{userId}/tags/{tag}'
-  , handler : removeTag
+  method: [ 'PUT', 'POST' ],
+  path: '/users/{userId}/tags',
+  handler: saveTags
+}, {
+  method: 'DELETE',
+  path: '/users/{userId}/tags/{tag}',
+  handler: removeTag
 }];
