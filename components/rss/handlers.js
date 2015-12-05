@@ -1,10 +1,12 @@
 'use strict';
 
 const FeedModel = require('./feed-model'),
+      trans = require('trans'),
       FeedSubModel = require('./feed-subscription-model'),
       PostModel = require('./post-model'),
       RecordNotFound = require('../core/errors/record-not-found'),
       DataQuery = require('../core/lib/data-query').DataQuery,
+      ReadStatus = require('./posts-read-status'),
       url = require('url');
 
 function returnFindResults(reply, query, modelName) {
@@ -17,7 +19,7 @@ function returnFindResults(reply, query, modelName) {
       reply.boom(new RecordNotFound(modelName, query));
     } else {
       if (Array.isArray(doc)) {
-        reply(doc.map(d => d.toObject()));
+        reply(doc.map(x => x.toObject()));
       } else {
         reply(doc.toObject());
       }
@@ -25,8 +27,18 @@ function returnFindResults(reply, query, modelName) {
   };
 }
 
-function create(request, reply, doc) {
+function queryFeedPosts(feedIds, cb) {
+  const query = new DataQuery();
+  query.addField('feedId', 1);
+  query.andCriteria('feedId', feedIds, 'in');
+  query.getQuery(PostModel).exec(cb);
+}
+
+function create(request, reply, doc, cb) {
   doc.save(err => {
+    cb = cb || (() => {});
+    cb(err);
+
     if (err && err.name === 'MongoError' && err.code === 11000) {
       reply.conflict(err);
     } else if (err && err.name === 'ValidationError') {
@@ -61,6 +73,7 @@ function update(request, reply, Model) {
 function remove(request, reply, Model, cb) {
   const modelName = Model.modelName;
   Model.remove({ _id: request.params.id }, err => {
+    cb = cb || (() => {});
     cb(err);
 
     if (err && err.name === 'CastError') {
@@ -143,7 +156,7 @@ function removeFeed(request, reply) {
 }
 
 function removePost(request, reply) {
-  remove(request, reply, PostModel, () => {});
+  remove(request, reply, PostModel);
 }
 
 function searchFeeds(request, reply) {
@@ -198,12 +211,83 @@ function feedSubscription(request, reply) {
 }
 
 function createSubscription(request, reply) {
-  create(request, reply, new FeedSubModel(request.payload || {}));
+  const doc = new FeedSubModel(request.payload || {});
+  create(request, reply, doc, () => {
+    queryFeedPosts([doc.feedId], (err, posts) => {
+      const status = new ReadStatus(request.server.app.redis);
+      const ids = trans(posts).map('.', 'toObject').pluck('id').value();
+      status.markAsRead(doc.userId, ids);
+    });
+  });
 }
 
 function removeSubscription(request, reply) {
-  remove(request, reply, FeedSubModel, () => {});
+  remove(request, reply, FeedSubModel);
 }
+
+function markPostsAsRead(request, reply) {
+  const userId = request.params.id,
+        postIds = request.payload.postIds || [],
+        status = new ReadStatus(request.server.app.redis);
+
+  status.markAsRead(userId, postIds, (err, data) => {
+    return err ? reply.boom(err) : reply(data);
+  });
+}
+
+function markPostsAsUnread(request, reply) {
+  const userId = request.params.id,
+        postIds = request.payload.postIds || [],
+        status = new ReadStatus(request.server.app.redis);
+
+  status.markAsUnread(userId, postIds, (err, data) => {
+    return err ? reply.boom(err) : reply(data);
+  });
+}
+
+function getReadState(request, reply) {
+  const userId = request.params.id,
+        postIds = request.payload.postIds || [],
+        status = new ReadStatus(request.server.app.redis);
+
+  status.readState(userId, postIds, (err, data) => {
+    return err ? reply.boom(err) : reply(data);
+  });
+}
+
+function getUnreadCounts(request, reply) {
+  FeedSubModel.find({ userId: request.params.id }, (err, subscriptions) => {
+    if (err) {
+      return reply.boom(err);
+    }
+
+    const feedIds = subscriptions.map(sub => sub.feedId);
+    queryFeedPosts(feedIds, (err, posts) => {
+      if (err) {
+        return reply.boom(err);
+      }
+
+      const userId = request.params.id,
+            status = new ReadStatus(request.server.app.redis);
+
+      status.readIds(userId, (err, data) => {
+        if (err) {
+          return reply.boom(err);
+        }
+
+        const readPosts = new Set(data);
+        const postsByFeed = trans(posts)
+                .map('.', 'toObject')
+                .group('feedId:feedId:count', 'id')
+                .mapf('count', [ 'filter', id => !readPosts.has(id) ], 'length')
+                .value();
+
+        reply(postsByFeed);
+      });
+    });
+  });
+}
+
 
 module.exports = {
   createFeed: createFeed,
@@ -220,5 +304,9 @@ module.exports = {
   searchPosts: searchPosts,
   updateFeed: updateFeed,
   updatePost: updatePost,
-  updateSubscription: updateSubscription
+  updateSubscription: updateSubscription,
+  markPostsAsUnread: markPostsAsUnread,
+  getReadState: getReadState,
+  markPostsAsRead: markPostsAsRead,
+  getUnreadCounts: getUnreadCounts
 };

@@ -66,4 +66,20 @@ module.exports = [{
   method: 'DELETE',
   path: '/feed-subscriptions/{id}',
   handler: handlers.removeSubscription
+}, {
+  method: 'POST',
+  path: '/user/{id}/mark-read',
+  handler: handlers.markPostsAsRead
+}, {
+  method: 'POST',
+  path: '/user/{id}/mark-unread',
+  handler: handlers.markPostsAsUnread
+}, {
+  method: 'POST',
+  path: '/user/{id}/read-state',
+  handler: handlers.getReadState
+}, {
+  method: 'GET',
+  path: '/user/{id}/unread-counts',
+  handler: handlers.getUnreadCounts
 }];
