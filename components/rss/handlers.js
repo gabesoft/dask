@@ -179,9 +179,34 @@ function updateSubscription(request, reply) {
   update(request, reply, FeedSubModel);
 }
 
+function unreadCountsPerFeed(redis, userId, subscriptions, cb) {
+  const feedIds = subscriptions.map(sub => sub.feedId);
+  queryFeedPosts(feedIds, (err, posts) => {
+    if (err) {
+      return cb(err);
+    }
+
+    const status = new ReadStatus(redis);
+
+    status.readIds(userId, (err, data) => {
+      if (err) {
+        return cb(err);
+      }
+
+      const readPosts = new Set(data);
+      const postsByFeed = trans(posts)
+              .map('.', 'toObject')
+              .group('feedId:feedId:count', 'id')
+              .mapf('count', [ 'filter', id => !readPosts.has(id) ], 'length')
+              .value();
+
+      cb(null, postsByFeed);
+    });
+  });
+}
+
 function findSubscriptions(request, reply, single) {
-  const query = {},
-        next = returnFindResults(reply, query, 'FeedSubscription');
+  const query = {};
 
   if (request.query.userId) {
     query.userId = request.query.userId;
@@ -199,7 +224,50 @@ function findSubscriptions(request, reply, single) {
     query.feedId = request.params.feedId;
   }
 
-  FeedSubModel[single ? 'findOne' : 'find'](query, next);
+  FeedSubModel[single ? 'findOne' : 'find'](query, (err, subscriptions) => {
+    if (err) {
+      return reply.boom(err);
+    }
+    if (single && !subscriptions) {
+      return reply.boom(new RecordNotFound('FeedSubscription', query));
+    }
+    if (single) {
+      subscriptions = [subscriptions];
+    }
+
+    unreadCountsPerFeed(
+      request.server.app.redis,
+      query.userId,
+      subscriptions,
+      (err, countsByFeed) => {
+        if (err) {
+          return reply.boom(err);
+        }
+
+        const counts = trans(countsByFeed).object('feedId', 'count').value();
+        subscriptions = trans(subscriptions)
+          .map('.', 'toObject')
+          .mapff('feedId', 'unreadCount', counts)
+          .value();
+
+        reply(single ? subscriptions[0] : subscriptions);
+      }
+    );
+  });
+}
+
+function getUnreadCounts(request, reply) {
+  FeedSubModel.find({ userId: request.params.id }, (err, subscriptions) => {
+    if (err) {
+      return reply.boom(err);
+    }
+
+    unreadCountsPerFeed(
+      request.server.app.redis,
+      request.params.id,
+      subscriptions,
+      (err, postsByFeed) => err ? reply.boom(err) : reply(postsByFeed));
+  });
 }
 
 function feedSubscriptions(request, reply) {
@@ -254,40 +322,6 @@ function getReadState(request, reply) {
     return err ? reply.boom(err) : reply(data);
   });
 }
-
-function getUnreadCounts(request, reply) {
-  FeedSubModel.find({ userId: request.params.id }, (err, subscriptions) => {
-    if (err) {
-      return reply.boom(err);
-    }
-
-    const feedIds = subscriptions.map(sub => sub.feedId);
-    queryFeedPosts(feedIds, (err, posts) => {
-      if (err) {
-        return reply.boom(err);
-      }
-
-      const userId = request.params.id,
-            status = new ReadStatus(request.server.app.redis);
-
-      status.readIds(userId, (err, data) => {
-        if (err) {
-          return reply.boom(err);
-        }
-
-        const readPosts = new Set(data);
-        const postsByFeed = trans(posts)
-                .map('.', 'toObject')
-                .group('feedId:feedId:count', 'id')
-                .mapf('count', [ 'filter', id => !readPosts.has(id) ], 'length')
-                .value();
-
-        reply(postsByFeed);
-      });
-    });
-  });
-}
-
 
 module.exports = {
   createFeed: createFeed,
