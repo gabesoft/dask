@@ -19,7 +19,6 @@ const Post = schema.create({
   pubdate: { type: Date },
   source: { type: Object },
   summary: { type: String },
-  tags: { type: [String], index: true },
   title: { type: String }
 });
 

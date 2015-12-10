@@ -7,6 +7,7 @@ const FeedModel = require('./feed-model'),
       RecordNotFound = require('../core/errors/record-not-found'),
       DataQuery = require('../core/lib/data-query').DataQuery,
       ReadStatus = require('./posts-read-status'),
+      noop = () => {},
       url = require('url');
 
 function returnFindResults(reply, query, modelName) {
@@ -37,7 +38,7 @@ function queryFeedPosts(feedIds, cb) {
 function create(request, reply, doc, cb) {
   doc.save(err => {
     cb = cb || (() => {});
-    cb(err);
+    cb(err, doc);
 
     if (err && err.name === 'MongoError' && err.code === 11000) {
       reply.conflict(err);
@@ -52,19 +53,20 @@ function create(request, reply, doc, cb) {
   });
 }
 
-function update(request, reply, Model) {
+function update(request, reply, Model, cb) {
   const modelName = Model.modelName,
         query = { _id: request.params.id };
 
   Model.findOne(query, (err, doc) => {
+    cb = cb || noop;
+    cb(err, doc);
+
     if (err) {
       reply.boom(err);
     } else if (!doc) {
       reply.boom(new RecordNotFound(modelName, query));
     } else {
-      const data = request.payload || {};
-      data.tags = data.tags || [];
-      doc.set(data);
+      doc.set(request.payload || {});
       doc.save(e => e ? reply.boom(e) : reply(doc.toObject()));
     }
   });
@@ -73,7 +75,7 @@ function update(request, reply, Model) {
 function remove(request, reply, Model, cb) {
   const modelName = Model.modelName;
   Model.remove({ _id: request.params.id }, err => {
-    cb = cb || (() => {});
+    cb = cb || noop;
     cb(err);
 
     if (err && err.name === 'CastError') {
@@ -206,7 +208,7 @@ function unreadCountsPerFeed(redis, userId, subscriptions, cb) {
 }
 
 function findSubscriptions(request, reply, single) {
-  const query = {};
+  const query = { enabled: true };
 
   if (request.query.userId) {
     query.userId = request.query.userId;
@@ -279,18 +281,38 @@ function feedSubscription(request, reply) {
 }
 
 function createSubscription(request, reply) {
-  const doc = new FeedSubModel(request.payload || {});
-  create(request, reply, doc, () => {
-    queryFeedPosts([doc.feedId], (err, posts) => {
-      const status = new ReadStatus(request.server.app.redis);
-      const ids = trans(posts).map('.', 'toObject').pluck('id').value();
-      status.markAsRead(doc.userId, ids);
-    });
+  const data = request.payload || {};
+  const markPosts = (err, doc) => {
+    if (!err) {
+      queryFeedPosts([doc.feedId], (err, posts) => {
+        const status = new ReadStatus(request.server.app.redis);
+        const ids = trans(posts).map('.', 'toObject').pluck('id').value();
+        status.markAsRead(doc.userId, ids);
+      });
+    }
+  };
+
+  FeedSubModel.findOne({ userId: data.userId, feedId: data.feedId }, (err, doc) => {
+    data.enabled = true;
+    if (doc) {
+      doc.set(data);
+      doc.save((e) => {
+        if (e) {
+          reply.boom(e);
+        } else {
+          reply(doc.toObject());
+        }
+        markPosts(e, doc);
+      });
+    } else {
+      create(request, reply, new FeedSubModel(data), markPosts);
+    }
   });
 }
 
 function removeSubscription(request, reply) {
-  remove(request, reply, FeedSubModel);
+  request.payload = { enabled: false };
+  update(request, reply, FeedSubModel);
 }
 
 function markPostsAsRead(request, reply) {

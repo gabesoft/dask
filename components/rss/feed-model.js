@@ -18,7 +18,6 @@ const Feed = schema.create({
   language: { type: String },
   link: { type: String, required: true, index: { unique: true } },
   postCount: { type: Number, required: true, default: 0 },
-  categories: { type: [String], index: true },
   title: { type: String },
   uri: { type: String, required: true, index: { unique: true } }
 });
