@@ -10,11 +10,10 @@ const UrlModel = require('./url-model'),
 function create(request, reply) {
   const url = new UrlModel(request.payload || {}),
         userId = request.params.userId,
-        redis = request.server.app.redis,
         requestUrl = request.url;
 
   url.on('save', (doc) => {
-    tagsHelper.set(redis, userId, doc.get('tags'));
+    tagsHelper.set(userId, doc.get('tags'));
   });
 
   url.set({
@@ -36,7 +35,6 @@ function create(request, reply) {
 
 function update(request, reply) {
   const userId = request.params.userId,
-        redis = request.server.app.redis,
         id = request.params.id,
         query = {
           _id: id,
@@ -50,7 +48,7 @@ function update(request, reply) {
       reply.boom(new RecordNotFoundError('url', query));
     } else {
       url.on('save', (doc) => {
-        tagsHelper.set(redis, userId, doc.get('tags'));
+        tagsHelper.set(userId, doc.get('tags'));
       });
 
       url.set(request.payload || {});

@@ -181,14 +181,14 @@ function updateSubscription(request, reply) {
   update(request, reply, FeedSubModel);
 }
 
-function unreadCountsPerFeed(redis, userId, subscriptions, cb) {
+function unreadCountsPerFeed(userId, subscriptions, cb) {
   const feedIds = subscriptions.map(sub => sub.feedId);
   queryFeedPosts(feedIds, (err, posts) => {
     if (err) {
       return cb(err);
     }
 
-    const status = new ReadStatus(redis);
+    const status = new ReadStatus();
 
     status.readIds(userId, (err, data) => {
       if (err) {
@@ -238,7 +238,6 @@ function findSubscriptions(request, reply, single) {
     }
 
     unreadCountsPerFeed(
-      request.server.app.redis,
       query.userId,
       subscriptions,
       (err, countsByFeed) => {
@@ -265,7 +264,6 @@ function getUnreadCounts(request, reply) {
     }
 
     unreadCountsPerFeed(
-      request.server.app.redis,
       request.params.id,
       subscriptions,
       (err, postsByFeed) => err ? reply.boom(err) : reply(postsByFeed));
@@ -285,7 +283,7 @@ function createSubscription(request, reply) {
   const markPosts = (err, doc) => {
     if (!err) {
       queryFeedPosts([doc.feedId], (err, posts) => {
-        const status = new ReadStatus(request.server.app.redis);
+        const status = new ReadStatus();
         const ids = trans(posts).map('.', 'toObject').pluck('id').value();
         status.markAsRead(doc.userId, ids);
       });
@@ -318,7 +316,7 @@ function removeSubscription(request, reply) {
 function markPostsAsRead(request, reply) {
   const userId = request.params.id,
         postIds = request.payload.postIds || [],
-        status = new ReadStatus(request.server.app.redis);
+        status = new ReadStatus();
 
   status.markAsRead(userId, postIds, (err, data) => {
     return err ? reply.boom(err) : reply(data);
@@ -328,7 +326,7 @@ function markPostsAsRead(request, reply) {
 function markPostsAsUnread(request, reply) {
   const userId = request.params.id,
         postIds = request.payload.postIds || [],
-        status = new ReadStatus(request.server.app.redis);
+        status = new ReadStatus();
 
   status.markAsUnread(userId, postIds, (err, data) => {
     return err ? reply.boom(err) : reply(data);
@@ -338,7 +336,7 @@ function markPostsAsUnread(request, reply) {
 function getReadState(request, reply) {
   const userId = request.params.id,
         postIds = request.payload.postIds || [],
-        status = new ReadStatus(request.server.app.redis);
+        status = new ReadStatus();
 
   status.readState(userId, postIds, (err, data) => {
     return err ? reply.boom(err) : reply(data);

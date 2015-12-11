@@ -3,29 +3,26 @@
 const tagsHelper = require('../tags/helper');
 
 function readTags(request, reply) {
-  const redis = request.server.app.redis,
-        userId = request.params.userId;
+  const userId = request.params.userId;
 
-  tagsHelper.get(redis, userId, (err, data) => {
+  tagsHelper.get(userId, (err, data) => {
     return err ? reply.boom(err) : reply(data);
   });
 }
 
 function saveTags(request, reply) {
-  const redis = request.server.app.redis,
-        userId = request.params.userId;
+  const userId = request.params.userId;
 
-  tagsHelper.set(redis, userId, request.payload, (err, data) => {
+  tagsHelper.set(userId, request.payload, (err, data) => {
     return err ? reply.boom(err) : reply(data);
   });
 }
 
 function removeTag(request, reply) {
-  const redis = request.server.app.redis,
-        userId = request.params.userId,
+  const userId = request.params.userId,
         tag = request.params.tag;
 
-  tagsHelper.remove(redis, userId, tag, (err, data) => {
+  tagsHelper.remove(userId, tag, (err, data) => {
     return err ? reply.boom(err) : reply(data);
   });
 }

@@ -4,7 +4,6 @@ const path = require('path'),
       glob = require('glob'),
       async = require('async'),
       mongoose = require('mongoose'),
-      redis = require('redis'),
       conf = require('./config/store.js'),
       Hapi = require('hapi'),
       server = new Hapi.Server({});
@@ -15,22 +14,6 @@ function connectMongoose(cb) {
         port = conf.get('mongo:port'),
         url = `mongodb://${host}:${port}/${db}`;
   mongoose.connect(url, cb);
-}
-
-function connectRedis(cb) {
-  const port = conf.get('redis:port'),
-        host = conf.get('redis.host'),
-        opts = {},
-        client = redis.createClient(port, host, opts);
-
-  client.on('ready', function() {
-    server.app.redis = client;
-    cb();
-  });
-  client.on('error', cb);
-  client.on('error', function(err) {
-    console.log(err);
-  });
 }
 
 function setupServer(cb) {
@@ -94,7 +77,7 @@ function startServer(cb) {
 }
 
 async.series([
-  setupServer, loadRoutes, registerPlugins, connectMongoose, connectRedis, startServer
+  setupServer, loadRoutes, registerPlugins, connectMongoose, startServer
 ], err => {
   if (err) {
     console.log(err);

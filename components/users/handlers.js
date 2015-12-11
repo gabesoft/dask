@@ -3,6 +3,7 @@
 const User = require('./user-model'),
       RecordNotFound = require('../core/errors/record-not-found'),
       GuidExpired = require('../core/errors/guid-expired'),
+      useRedis = require('../../redis').useClient,
       url = require('url');
 
 function create(request, reply) {
@@ -63,10 +64,11 @@ function findOne(request, reply, query) {
 
 function findByGuid(request, reply) {
   const guid = request.query.guid,
-        key = 'user-' + guid,
-        redis = request.server.app.redis;
+        key = 'user-' + guid;
 
-  redis.get(key, (err, userId) => {
+  useRedis(client => {
+    return client.getAsync(key);
+  }, (err, userId) => {
     if (err) {
       reply.boom(err);
     } else if (!userId) {
@@ -124,23 +126,24 @@ function link(request, reply) {
   const guid = request.payload.guid,
         ttlInSeconds = request.payload.ttlInSeconds,
         userId = request.payload.userId,
-        redis = request.server.app.redis,
         key = 'user-' + guid;
 
-  redis.multi()
-    .set(key, userId)
-    .expire(key, ttlInSeconds)
-    .exec(err => {
-      if (err) {
-        reply.boom(err);
-      } else {
-        reply({
-          status: 'link-created',
-          userId: userId,
-          guid: guid
-        });
-      }
-    });
+  useRedis(client => {
+    return client.multi()
+      .set(key, userId)
+      .expire(key, ttlInSeconds)
+      .execAsync();
+  }, err => {
+    if (err) {
+      reply.boom(err);
+    } else {
+      reply({
+        status: 'link-created',
+        userId: userId,
+        guid: guid
+      });
+    }
+  });
 }
 
 module.exports = {
