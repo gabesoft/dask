@@ -68,7 +68,7 @@ function remove(request, reply) {
   UrlModel.remove({
     _id: request.params.id,
     userId: userId
-  }, function(err) {
+  }, err => {
     return err ? reply.boom(err) : reply({
       status: 'url-deleted',
       id: request.params.id

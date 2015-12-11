@@ -66,6 +66,7 @@ function update(request, reply, Model, cb) {
     } else if (!doc) {
       reply.boom(new RecordNotFound(modelName, query));
     } else {
+      doc.set('tags', request.payload.tags || []);
       doc.set(request.payload || {});
       doc.save(e => e ? reply.boom(e) : reply(doc.toObject()));
     }
@@ -285,7 +286,7 @@ function createSubscription(request, reply) {
       queryFeedPosts([doc.feedId], (err, posts) => {
         const status = new ReadStatus();
         const ids = trans(posts).map('.', 'toObject').pluck('id').value();
-        status.markAsRead(doc.userId, ids);
+        status.markAsRead(doc.userId, ids, noop);
       });
     }
   };
@@ -309,8 +310,19 @@ function createSubscription(request, reply) {
 }
 
 function removeSubscription(request, reply) {
-  request.payload = { enabled: false };
-  update(request, reply, FeedSubModel);
+  const query = { _id: request.params.id };
+  FeedSubModel.findOne(query, (err, doc) => {
+    if (err) {
+      return reply.boom(err);
+    }
+    if (!doc) {
+      return reply.boom(new RecordNotFound('FeedSubModel', query));
+    }
+    doc.set('enabled', false);
+    doc.save(e => {
+      return e ? reply.boom(e) : reply(doc.toObject());
+    });
+  });
 }
 
 function markPostsAsRead(request, reply) {
