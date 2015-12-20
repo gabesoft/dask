@@ -18,7 +18,7 @@ const mongoose = require('mongoose'),
           virtuals: true,
           getters: true,
           minimize: true,
-          transform: transform
+          transform
         }
       };
 

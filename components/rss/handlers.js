@@ -1,12 +1,11 @@
 'use strict';
 
 const FeedModel = require('./feed-model'),
-      trans = require('trans'),
+      indexer = require('./indexer'),
       FeedSubModel = require('./feed-subscription-model'),
       PostModel = require('./post-model'),
       RecordNotFound = require('../core/errors/record-not-found'),
       DataQuery = require('../core/lib/data-query').DataQuery,
-      ReadStatus = require('./posts-read-status'),
       noop = () => {},
       url = require('url');
 
@@ -26,13 +25,6 @@ function returnFindResults(reply, query, modelName) {
       }
     }
   };
-}
-
-function queryFeedPosts(feedIds, cb) {
-  const query = new DataQuery();
-  query.addField('feedId', 1);
-  query.andCriteria('feedId', feedIds, 'in');
-  query.getQuery(PostModel).exec(cb);
 }
 
 function create(request, reply, doc, cb) {
@@ -153,8 +145,17 @@ function removeFeed(request, reply) {
       return reply.boom(err);
     }
 
-    PostModel.remove({ feedId: request.params.id }, () => {});
-    FeedSubModel.remove({ feedId: request.params.id }, () => {});
+    PostModel
+      .remove({ feedId: request.params.id })
+      .then(() => console.log('posts deleted'), console.log.bind(console));
+
+    FeedSubModel
+      .findOne({ feedId: request.params.id })
+      .then(doc => {
+        doc.remove();
+        return indexer.deletePosts(doc.toObject());
+      })
+      .then(() => console.log('subscription deleted'), console.log.bind(console));
   });
 }
 
@@ -178,201 +179,15 @@ function updatePost(request, reply) {
   update(request, reply, PostModel);
 }
 
-function updateSubscription(request, reply) {
-  update(request, reply, FeedSubModel);
-}
-
-function unreadCountsPerFeed(userId, subscriptions, cb) {
-  const feedIds = subscriptions.map(sub => sub.feedId);
-  queryFeedPosts(feedIds, (err, posts) => {
-    if (err) {
-      return cb(err);
-    }
-
-    const status = new ReadStatus();
-
-    status.readIds(userId, (err, data) => {
-      if (err) {
-        return cb(err);
-      }
-
-      const readPosts = new Set(data);
-      const postsByFeed = trans(posts)
-              .map('.', 'toObject')
-              .group('feedId:feedId:count', 'id')
-              .mapf('count', [ 'filter', id => !readPosts.has(id) ], 'length')
-              .value();
-
-      cb(null, postsByFeed);
-    });
-  });
-}
-
-function findSubscriptions(request, reply, single) {
-  const query = { enabled: true };
-
-  if (request.query.userId) {
-    query.userId = request.query.userId;
-  }
-
-  if (request.params.userId) {
-    query.userId = request.params.userId;
-  }
-
-  if (request.query.feedId) {
-    query.feedId = request.query.feedId;
-  }
-
-  if (request.params.feedId) {
-    query.feedId = request.params.feedId;
-  }
-
-  FeedSubModel[single ? 'findOne' : 'find'](query, (err, subscriptions) => {
-    if (err) {
-      return reply.boom(err);
-    }
-    if (single && !subscriptions) {
-      return reply.boom(new RecordNotFound('FeedSubscription', query));
-    }
-    if (single) {
-      subscriptions = [subscriptions];
-    }
-
-    unreadCountsPerFeed(
-      query.userId,
-      subscriptions,
-      (err, countsByFeed) => {
-        if (err) {
-          return reply.boom(err);
-        }
-
-        const counts = trans(countsByFeed).object('feedId', 'count').value();
-        subscriptions = trans(subscriptions)
-          .map('.', 'toObject')
-          .mapff('feedId', 'unreadCount', counts)
-          .value();
-
-        reply(single ? subscriptions[0] : subscriptions);
-      }
-    );
-  });
-}
-
-function getUnreadCounts(request, reply) {
-  FeedSubModel.find({ userId: request.params.id }, (err, subscriptions) => {
-    if (err) {
-      return reply.boom(err);
-    }
-
-    unreadCountsPerFeed(
-      request.params.id,
-      subscriptions,
-      (err, postsByFeed) => err ? reply.boom(err) : reply(postsByFeed));
-  });
-}
-
-function feedSubscriptions(request, reply) {
-  findSubscriptions(request, reply, false);
-}
-
-function feedSubscription(request, reply) {
-  findSubscriptions(request, reply, true);
-}
-
-function createSubscription(request, reply) {
-  const data = request.payload || {};
-  const markPosts = (err, doc) => {
-    if (!err) {
-      queryFeedPosts([doc.feedId], (err, posts) => {
-        const status = new ReadStatus();
-        const ids = trans(posts).map('.', 'toObject').pluck('id').value();
-        status.markAsRead(doc.userId, ids, noop);
-      });
-    }
-  };
-
-  FeedSubModel.findOne({ userId: data.userId, feedId: data.feedId }, (err, doc) => {
-    data.enabled = true;
-    if (doc) {
-      doc.set(data);
-      doc.save((e) => {
-        if (e) {
-          reply.boom(e);
-        } else {
-          reply(doc.toObject());
-        }
-        markPosts(e, doc);
-      });
-    } else {
-      create(request, reply, new FeedSubModel(data), markPosts);
-    }
-  });
-}
-
-function removeSubscription(request, reply) {
-  const query = { _id: request.params.id };
-  FeedSubModel.findOne(query, (err, doc) => {
-    if (err) {
-      return reply.boom(err);
-    }
-    if (!doc) {
-      return reply.boom(new RecordNotFound('FeedSubModel', query));
-    }
-    doc.set('enabled', false);
-    doc.save(e => {
-      return e ? reply.boom(e) : reply(doc.toObject());
-    });
-  });
-}
-
-function markPostsAsRead(request, reply) {
-  const userId = request.params.id,
-        postIds = request.payload.postIds || [],
-        status = new ReadStatus();
-
-  status.markAsRead(userId, postIds, (err, data) => {
-    return err ? reply.boom(err) : reply(data);
-  });
-}
-
-function markPostsAsUnread(request, reply) {
-  const userId = request.params.id,
-        postIds = request.payload.postIds || [],
-        status = new ReadStatus();
-
-  status.markAsUnread(userId, postIds, (err, data) => {
-    return err ? reply.boom(err) : reply(data);
-  });
-}
-
-function getReadState(request, reply) {
-  const userId = request.params.id,
-        postIds = request.payload.postIds || [],
-        status = new ReadStatus();
-
-  status.readState(userId, postIds, (err, data) => {
-    return err ? reply.boom(err) : reply(data);
-  });
-}
-
 module.exports = {
   createFeed: createFeed,
   createPost: createPost,
-  createSubscription: createSubscription,
-  feedSubscription: feedSubscription,
-  feedSubscriptions: feedSubscriptions,
   readFeed: readFeed,
   readPost: readPost,
   removeFeed: removeFeed,
   removePost: removePost,
-  removeSubscription: removeSubscription,
   searchFeeds: searchFeeds,
   searchPosts: searchPosts,
   updateFeed: updateFeed,
-  updatePost: updatePost,
-  updateSubscription: updateSubscription,
-  markPostsAsUnread: markPostsAsUnread,
-  getReadState: getReadState,
-  markPostsAsRead: markPostsAsRead,
-  getUnreadCounts: getUnreadCounts
+  updatePost: updatePost
 };

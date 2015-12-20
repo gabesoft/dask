@@ -79,8 +79,12 @@ function findByGuid(request, reply) {
   });
 }
 
-function find(request, reply, query) {
-  User.find(query, (err, users) => {
+function find(request, reply) {
+  const query = request.query;
+  const fields = (request.query.fields || '').split('~').join(' ');
+
+  delete query.fields;
+  User.find(query, fields, (err, users) => {
     if (err && err.name === 'CastError') {
       reply.badRequest(err);
     } else if (err) {
@@ -101,7 +105,7 @@ function search(request, reply) {
   if (request.query.guid) {
     findByGuid(request, reply);
   } else {
-    find(request, reply, request.query);
+    find(request, reply);
   }
 }
 

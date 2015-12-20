@@ -1,7 +1,11 @@
 default: test
 
-MOCHA   = node_modules/.bin/mocha -u tdd --check-leaks
-VERSION = $(shell node -pe 'require("./package.json").version')
+MODULES  = ./node_modules/.bin
+MOCHA    = $(MODULES)/mocha -u tdd --check-leaks
+MPR      = $(MODULES)/mpr
+NODE_DEV = $(MODULES)/node-dev
+VERSION  = $(shell node -pe 'require("./package.json").version')
+TESTS		:= $(shell find ./test -name '*.js')
 
 all: test
 
@@ -18,22 +22,22 @@ mongo:
 	@mongod --config /usr/local/etc/mongod.conf
 
 serve:
-	@node-dev server.js
+	@$(NODE_DEV) server.js
 
 run:
-	@mpr run mpr.json
+	@$(MPR) run mpr.json
 
 tag-push: tag
 	@git push --tags origin HEAD:master
 
 test:
-	@NODE_ENV=test $(MOCHA) -R spec test/**/*.js --grep @slow --invert
+	@NODE_ENV=test $(MOCHA) -R mocha-better-spec-reporter --grep @slow --invert $(TESTS)
 
 test-slow:
-	@NODE_ENV=test $(MOCHA) -R spec test/*.js --grep @slow --timeout 10000
+	@NODE_ENV=test $(MOCHA) -R spec test/**/*.js --grep @slow --timeout 10000
 
 test-all:
-	@NODE_ENV=test $(MOCHA) -R spec test/*.js --timeout 10000
+	@NODE_ENV=test $(MOCHA) -R spec test/**/*.js --timeout 10000
 
 jshint:
 	jshint .
@@ -46,4 +50,3 @@ setup:
 
 clean-dep:
 	@rm -rf node_modules
-

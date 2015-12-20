@@ -1,6 +1,5 @@
 {
     "app": {
-        "url": "http://localhost:8006",
         "port": 8006
     },
     "mongo": {
@@ -14,6 +13,8 @@
     "elasticsearch": {
         "host": "10.0.1.2",
         "port": 9200,
-        "index": ".dev-dask"
+        "base-index": ".dev-dask",
+        "log-level": ["error","trace"],
+        "api-version": "2.1"
     }
 }

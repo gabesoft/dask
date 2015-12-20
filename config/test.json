@@ -1,0 +1,9 @@
+{
+    "app": {
+        "port": 9006
+    },
+    "mongo": {
+        "database": "dask-test",
+        "host": "localhost"
+    }
+}

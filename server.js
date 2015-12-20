@@ -6,6 +6,10 @@ const path = require('path'),
       mongoose = require('mongoose'),
       conf = require('./config/store.js'),
       Hapi = require('hapi'),
+      Logger = require('srunner').Logger,
+      log = new Logger(),
+      Chalk = require('chalk').constructor,
+      chalk = new Chalk({ enabled: true }),
       server = new Hapi.Server({});
 
 function connectMongoose(cb) {
@@ -31,8 +35,14 @@ function loadRoutes(cb) {
           root: components
         };
 
-  glob('/**/routes.js', opts, (err, files) => {
+  log.info(chalk.blue('loading routes'));
+  async.parallel({
+    top: next => glob('/**/routes.js', opts, next),
+    nested: next => glob('/**/routes/*.js', opts, next)
+  }, (err, results) => {
     if (err) { return cb(err); }
+
+    const files = results.top.concat(results.nested);
 
     files.forEach(file => {
       let routes = require(file);
@@ -41,22 +51,33 @@ function loadRoutes(cb) {
         routes = [routes];
       }
 
+      log.info(`adding routes from ${chalk.green(file)}`);
       routes.forEach((route) => {
         try {
           server.route(route);
-        } catch (routeErr) {
-          console.log('failed to add routes', file, routeErr);
+          log.info(`added ${chalk.blue((route || {}).method)} ${chalk.yellow((route || {}).path)}`);
+        } catch (err) {
+          log.error(`failed to add routes from ${chalk.red(file)}`);
+          log.error(`skipped ${chalk.blue((route || {}).method)} ${chalk.yellow((route || {}).path)}`);
+          log.error(err.stack || err.message);
         }
       });
     });
 
-    return cb(null);
+    cb(null);
   });
 }
 
 function registerPlugins(cb) {
   server.register([{
     register: require('http-status-decorator')
+  }, {
+    register: require('vision')
+  }, {
+    register: require('inert')
+  }, {
+    register: require('lout'),
+    options: { endpoint: '/documentation' }
   }, {
     register: require('good'),
     options: {
@@ -71,7 +92,7 @@ function registerPlugins(cb) {
 
 function startServer(cb) {
   server.start(err => {
-    console.log('server started: ', server.info.uri);
+    log.info(`server.started ${chalk.blue(server.info.uri)}`);
     cb(err);
   });
 }
@@ -80,7 +101,7 @@ async.series([
   setupServer, loadRoutes, registerPlugins, connectMongoose, startServer
 ], err => {
   if (err) {
-    console.log(err);
+    log.error(err.stack || err.message);
     throw err;
   }
 });

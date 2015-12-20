@@ -10,8 +10,8 @@ const FeedSubscription = schema.create({
   title: { type: String },
   tags: { type: [String], index: true },
   notes: { type: String },
-  enabled: { type: Boolean, required: true, default: true }
-});
+  disabled: { type: Boolean, required: true, default: false }
+}, null, true);
 
 FeedSubscription.index({ userId: 1, feedId: 1 }, { unique: true });
 

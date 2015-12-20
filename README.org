@@ -1,0 +1,35 @@
+#+TITLE: Dask Api Server
+
+* Api types
+** CRUD - operations on one item
+|--------+-----------+--------------------------+--------+------------------+--------------------------------|
+| Verb   | Route     | Operation                | Status | Response         | Headers                        |
+|--------+-----------+--------------------------+--------+------------------+--------------------------------|
+| GET    | /items/id | get an item by id        |        |                  |                                |
+| POST   | /items    | create an item           |    201 | the created item | the location of the new object |
+| PUT    | /items/id | replace the item with id |        |                  |                                |
+| PATCH  | /items/id | update the item with id  |        |                  |                                |
+| DELETE | /items/id | delete the item with id  |        |                  |                                |
+|--------+-----------+--------------------------+--------+------------------+--------------------------------|
+** Search - query multiple items
+|------+---------------------+----------------------------------------------|
+| Verb | Route               | Operation                                    |
+|------+---------------------+----------------------------------------------|
+| GET  | /search/items?q=... | search for items via query string parameters |
+| POST | /search/items       | search for items via a json query            |
+|------+---------------------+----------------------------------------------|
+** Bulk - operations on multiple items
+|--------+-------------+------------------------|
+| Verb   | Route       | Operation              |
+|--------+-------------+------------------------|
+| POST   | /bulk/items | create multiple items  |
+| PUT    | /bulk/items | replace multiple items |
+| PATCH  | /bulk/items | update multiple items  |
+| DELETE | /bulk/items | delete multiple items  |
+|--------+-------------+------------------------|
+** Query Syntax
+*** String
+*** Json
+
+
+
