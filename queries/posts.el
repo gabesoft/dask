@@ -30,8 +30,22 @@ Content-type: :content-type
     "title": "Test title"
 }
 
+# post creation - invalid
+# successful first then conflict error subsequent times
+POST :base/posts
+Content-type: :content-type
+{
+    "author": "Anonymous",
+    "date": "2015-05-12T00:00:00.000Z",
+    "description": "Test description",
+    "link": "http://sample-posts.com/sample-post-1",
+    "pubdate": "2015-05-12T00:00:00.000Z",
+    "tags": [ "javascript", "test" ],
+    "title": "Test title"
+}
+
 # post replace
-PUT :base/posts/5674f15f378022334ef5a8fe
+PUT :base/posts/5677a14921a210927374a8de
 Content-type: :content-type
 {
     "author": "Anonymous",
@@ -43,7 +57,7 @@ Content-type: :content-type
 }
 
 # post update
-PATCH :base/posts/5674f15f378022334ef5a8fe
+PATCH :base/posts/5677a14921a210927374a8de
 Content-type: :content-type
 {
     "author": "Anonymous",
@@ -58,7 +72,7 @@ Content-type: :content-type
 }
 
 # existing post read 
-GET :base/posts/5674f15f378022334ef5a8fe
+GET :base/posts/5677a14921a210927374a8de
 
 # non existing post read 
 GET :base/posts/5674dcc9f73a74423ae68b2x
@@ -67,7 +81,7 @@ GET :base/posts/5674dcc9f73a74423ae68b2x
 GET :base/posts/
 
 # post delete
-DELETE :base/posts/5674f15f378022334ef5a8fe
+# DELETE :base/posts/5677a14921a210927374a8de
 
 # bulk post creation
 # successful first then conflict error subsequent times

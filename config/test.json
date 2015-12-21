@@ -4,6 +4,7 @@
     },
     "mongo": {
         "database": "dask-test",
-        "host": "localhost"
+        "host": "localhost",
+        "port": 27999
     }
 }

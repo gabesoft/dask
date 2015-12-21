@@ -23,14 +23,14 @@ const mongoose = require('mongoose'),
       };
 
 module.exports.create = (fields, options, addTimestamp) => {
-  const model = new Schema(fields, extend(extend({}, defaults), options));
+  const schema = new Schema(fields, extend(extend({}, defaults), options));
 
   if (addTimestamp) {
-    model.plugin(timestamp);
+    schema.plugin(timestamp);
   }
 
   if ('tags' in fields) {
-    model.pre('save', function preModelSave(next) {
+    schema.pre('save', function preModelSave(next) {
       const tags = this.get('tags') || [],
             uniq = {};
 
@@ -44,5 +44,18 @@ module.exports.create = (fields, options, addTimestamp) => {
     });
   }
 
-  return model;
+  schema.getPaths = (exclude) => {
+    exclude = exclude || [];
+    const paths = [];
+
+    schema.eachPath(path => {
+      if (exclude.indexOf(path) === -1) {
+        paths.push(path);
+      }
+    });
+
+    return paths;
+  };
+
+  return schema;
 };

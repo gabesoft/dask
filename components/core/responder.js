@@ -1,6 +1,7 @@
 'use strict';
 
-const Boom = require('boom');
+const Boom = require('boom'),
+      errors = require('mongoose/lib/error');
 
 function getBody(data) {
   const isModel = data && data.constructor.name === 'model',
@@ -18,6 +19,22 @@ function getBody(data) {
   return data;
 }
 
+function processError(reply, err) {
+  if (err.name === 'MongoError' && err.code === 11000) {
+    return reply(Boom.conflict(err.message, err));
+  } else if (err instanceof errors.ValidationError) {
+    const message = Object
+            .keys(err.errors)
+            .map(key => err.errors[key].message)
+            .join(' ');
+    return reply(Boom.badRequest(message, err));
+  } else if (err instanceof errors.CastError) {
+    return reply(Boom.badRequest(err.message, err));
+  } else {
+    return reply(Boom.wrap(err, err.statusCode || 500, err.message));
+  }
+}
+
 function createdSuccess(request, reply) {
   return data => {
     const locationUrl = `${request.url.pathname}/${data.id}`;
@@ -26,13 +43,7 @@ function createdSuccess(request, reply) {
 }
 
 function createdFailure(request, reply) {
-  return err => {
-    if (err.name === 'MongoError' && err.code === 11000) {
-      reply(Boom.conflict(err.message, err));
-    } else {
-      reply(Boom.wrap(err.statusCode || 500, err.message, err));
-    }
-  };
+  return err => processError(reply, err);
 }
 
 function bulkCreatedSuccess(request, reply) {
@@ -42,25 +53,15 @@ function bulkCreatedSuccess(request, reply) {
 }
 
 function bulkCreatedFailure(request, reply) {
-  return err => {
-    if (err.name === 'MongoError' && err.code === 11000) {
-      reply(Boom.conflict(err.message, err));
-    } else {
-      reply(Boom.wrap(err.statusCode || 500, err.message, err));
-    }
-  };
+  return err => processError(reply, err);
 }
 
 function deletedFailure(request, reply) {
-  return err => {
-    reply(Boom.wrap(err.statusCode || 500, err.message, err));
-  };
+  return err => processError(reply, err);
 }
 
 function replacedFailure(request, reply) {
-  return err => {
-    reply(Boom.wrap(err.statusCode || 500, err.message, err));
-  };
+  return err => processError(reply, err);
 }
 
 function readSuccess(request, reply) {
@@ -72,9 +73,7 @@ function readSuccess(request, reply) {
 }
 
 function readFailure(request, reply) {
-  return err => {
-    reply(Boom.wrap(err.statusCode || 500, err.message, err));
-  };
+  return err => processError(reply, err);
 }
 
 module.exports = {

@@ -1,49 +1,43 @@
 'use strict';
 
 const PostModel = require('../post-model'),
-      RecordNotFound = require('../../core/errors/record-not-found'),
       responder = require('../../core/responder'),
       Promise = require('bluebird').Promise,
-      DataQuery = require('../../core/lib/data-query').DataQuery,
-      url = require('url'),
+      // DataQuery = require('../../core/lib/data-query').DataQuery,
       searcher = require('../searcher');
 
-function notFound(id) {
-  return new RecordNotFound('Post', { id });
-}
+// function updateUserPosts(request, reply) {
+//   const ids = request.params.ids.split('/'),
+//         posts = ids.map(id => Object.assign({ _id: id }, request.payload || {}));
+//   return searcher.update(posts).then(reply, e => reply.boom(e));
+// }
 
-function updateUserPosts(request, reply) {
-  const ids = request.params.ids.split('/'),
-        posts = ids.map(id => Object.assign({ _id: id }, request.payload || {}));
-  return searcher.update(posts).then(reply, e => reply.boom(e));
-}
+// function searchPostsOld(request, reply) {
+//   const input = request.query || {},
+//         fields = (input.fields || '').split('~').filter(Boolean),
+//         query = new DataQuery();
 
-function searchPostsOld(request, reply) {
-  const input = request.query || {},
-        fields = (input.fields || '').split('~').filter(Boolean),
-        query = new DataQuery();
+//   PostModel.schema.eachPath(path => {
+//     if (input[path]) {
+//       query.andCriteria(path, input[path]);
+//     }
+//   });
 
-  PostModel.schema.eachPath(path => {
-    if (input[path]) {
-      query.andCriteria(path, input[path]);
-    }
-  });
+//   query.parseSort(input.sort || 'date:desc');
+//   query.addLimit(input.limit);
+//   query.addSkip(input.skip);
 
-  query.parseSort(input.sort || 'date:desc');
-  query.addLimit(input.limit);
-  query.addSkip(input.skip);
+//   fields.forEach(field => query.addField(field, 1));
 
-  fields.forEach(field => query.addField(field, 1));
+//   if (query.error) {
+//     return reply.boom(query.error);
+//   }
 
-  if (query.error) {
-    return reply.boom(query.error);
-  }
-
-  query
-    .getQuery(PostModel)
-    .exec()
-    .then(docs => reply(docs.map(doc => doc.toObject())), e => reply.boom(e));
-}
+//   query
+//     .getQuery(PostModel)
+//     .exec()
+//     .then(docs => reply(docs.map(doc => doc.toObject())), e => reply.boom(e));
+// }
 
 function bulkDeletePosts(request, reply) {
 
@@ -76,7 +70,7 @@ function searchPosts(request, reply) {
 }
 
 function deletePost(request, reply) {
-  PostModel
+  return PostModel
     .findById(request.params.id)
     .then(doc => doc ? doc.remove() : null)
     .then(
@@ -85,7 +79,7 @@ function deletePost(request, reply) {
 }
 
 function updatePost(request, reply) {
-  PostModel
+  return PostModel
     .findById(request.params.id)
     .then(doc => {
       if (doc) {
@@ -100,10 +94,15 @@ function updatePost(request, reply) {
 
 function replacePost(request, reply) {
   const query = { _id: request.params.id },
-        data = request.payload || {},
-        opts = { new: true, overwrite: true };
+        data = Object.assign({ $unset: {} }, request.payload || {}),
+        opts = { new: true, runValidators: true };
 
-  PostModel
+  PostModel.schema
+    .getPaths(['_id', '__v'])
+    .filter(path => !(path in data))
+    .forEach(path => data.$unset[path] = 1);
+
+  return PostModel
     .findOneAndUpdate(query, data, opts)
     .then(
       responder.replacedSuccess(request, reply),
@@ -111,7 +110,7 @@ function replacePost(request, reply) {
 }
 
 function createPost(request, reply) {
-  new PostModel(request.payload || {})
+  return new PostModel(request.payload || {})
     .save()
     .then(
       responder.createdSuccess(request, reply),
@@ -119,7 +118,7 @@ function createPost(request, reply) {
 }
 
 function readPost(request, reply) {
-  PostModel
+  return PostModel
     .findById(request.params.id)
     .then(
       responder.readSuccess(request, reply),

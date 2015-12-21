@@ -48,7 +48,7 @@ const cases = {
   '#ruby & abcd | (#java & #linux)': and(tag('ruby'), or(text('abcd'), and(tag('java'), tag('linux'))))
 };
 
-describe('url-query', () => {
+describe('url-query @simple', () => {
   it('populates criteria, projection, and sort', () => {
     const q = new Query();
     expect(q.criteria).to.eql({});
