@@ -81,6 +81,8 @@ module.exports = {
   createdFailure,
   bulkCreatedSuccess,
   bulkCreatedFailure,
+  bulkReplacedSuccess: bulkCreatedSuccess,
+  bulkReplacedFailure: bulkCreatedFailure,
   replacedSuccess: readSuccess,
   replacedFailure,
   updatedSuccess: readSuccess,

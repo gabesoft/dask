@@ -75,13 +75,21 @@ Content-type: :content-type
 GET :base/posts/5677a14921a210927374a8de
 
 # non existing post read 
-GET :base/posts/5674dcc9f73a74423ae68b2x
+GET :base/posts/5674dcc9f73a74423ae68b20
+
+# invalid id post read 
+GET :base/posts/abcd
 
 # no id specified
 GET :base/posts/
 
 # post delete
 # DELETE :base/posts/5677a14921a210927374a8de
+
+# bulk post creation - non array input
+POST :base/bulk/posts
+Content-type: :content-type
+{}
 
 # bulk post creation
 # successful first then conflict error subsequent times
@@ -92,7 +100,7 @@ Content-type: :content-type
     "date": "2015-05-12T00:00:00.000Z",
     "description": "Test description",
     "feedId": "563aec31d9ccd0b9cf91b804",
-    "guid": "sample-post-6",
+    "guid": "sample-post-9",
     "link": "http://sample-posts.com/sample-post-1",
     "pubdate": "2015-05-12T00:00:00.000Z",
     "tags": [ "javascript", "test" ],

@@ -39,6 +39,37 @@ const PostModel = require('../post-model'),
 //     .then(docs => reply(docs.map(doc => doc.toObject())), e => reply.boom(e));
 // }
 
+function remove(id) {
+  return PostModel.findById(id).then(doc => doc ? doc.remove() : null);
+}
+
+function update(data, id) {
+  return PostModel
+    .findById(id || data.id)
+    .then(doc => doc ? doc.set(data || {}).save() : null);
+}
+
+function replace(data, id) {
+  const opts = { new: true, runValidators: true };
+
+  data = Object.assign({ $unset: {} }, data || {});
+
+  PostModel.schema
+    .getPaths(['_id', '__v'])
+    .filter(path => !(path in data))
+    .forEach(path => data.$unset[path] = 1);
+
+  return PostModel.findOneAndUpdate({ _id: id || data.id }, data, opts);
+}
+
+function create(data) {
+  return new PostModel(data || {}).save();
+}
+
+function read(id) {
+  return PostModel.findById(id);
+}
+
 function bulkDeletePosts(request, reply) {
 
 }
@@ -48,21 +79,27 @@ function bulkUpdatePosts(request, reply) {
 }
 
 function bulkReplacePosts(request, reply) {
+  const promises = (request.payload || [])
+          .map(replace)
+          .map(promise => Promise.resolve(promise).reflect());
 
+  return Promise
+    .all(promises)
+    .map(promise => promise.isFulfilled() ? promise.value() : promise.reason())
+    .then(responder.bulkReplacedSuccess(request, reply),
+          responder.bulkReplacedFailure(request, reply));
 }
 
 function bulkCreatePosts(request, reply) {
-  const items = request.payload || [],
-        promises = items
-          .map(item => (new PostModel(item)).save())
+  const promises = (request.payload || [])
+          .map(create)
           .map(promise => Promise.resolve(promise).reflect());
 
-  Promise
+  return Promise
     .all(promises)
     .map(promise => promise.isFulfilled() ? promise.value() : promise.reason())
-    .then(
-      responder.bulkCreatedSuccess(request, reply),
-      responder.bulkCreatedFailure(request, reply));
+    .then(responder.bulkCreatedSuccess(request, reply),
+          responder.bulkCreatedFailure(request, reply));
 }
 
 function searchPosts(request, reply) {
@@ -70,59 +107,33 @@ function searchPosts(request, reply) {
 }
 
 function deletePost(request, reply) {
-  return PostModel
-    .findById(request.params.id)
-    .then(doc => doc ? doc.remove() : null)
-    .then(
-      responder.deletedSuccess(request, reply),
-      responder.deletedFailure(request, reply));
+  return remove(request.params.id)
+    .then(responder.deletedSuccess(request, reply),
+          responder.deletedFailure(request, reply));
 }
 
 function updatePost(request, reply) {
-  return PostModel
-    .findById(request.params.id)
-    .then(doc => {
-      if (doc) {
-        doc.set(request.payload || {});
-        return doc.save();
-      }
-    })
-    .then(
-      responder.updatedSuccess(request, reply),
-      responder.updatedFailure(request, reply));
+  return update(request.payload, request.params.id)
+    .then(responder.updatedSuccess(request, reply),
+          responder.updatedFailure(request, reply));
 }
 
 function replacePost(request, reply) {
-  const query = { _id: request.params.id },
-        data = Object.assign({ $unset: {} }, request.payload || {}),
-        opts = { new: true, runValidators: true };
-
-  PostModel.schema
-    .getPaths(['_id', '__v'])
-    .filter(path => !(path in data))
-    .forEach(path => data.$unset[path] = 1);
-
-  return PostModel
-    .findOneAndUpdate(query, data, opts)
-    .then(
-      responder.replacedSuccess(request, reply),
-      responder.replacedFailure(request, reply));
+  return replace(request.payload, request.params.id)
+    .then(responder.replacedSuccess(request, reply),
+          responder.replacedFailure(request, reply));
 }
 
 function createPost(request, reply) {
-  return new PostModel(request.payload || {})
-    .save()
-    .then(
-      responder.createdSuccess(request, reply),
-      responder.createdFailure(request, reply));
+  return create(request.payload)
+    .then(responder.createdSuccess(request, reply),
+          responder.createdFailure(request, reply));
 }
 
 function readPost(request, reply) {
-  return PostModel
-    .findById(request.params.id)
-    .then(
-      responder.readSuccess(request, reply),
-      responder.readFailure(request, reply));
+  return read(request.params.id)
+    .then(responder.readSuccess(request, reply),
+          responder.readFailure(request, reply));
 }
 
 module.exports = {

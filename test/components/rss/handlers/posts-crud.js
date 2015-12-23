@@ -1,10 +1,9 @@
 'use strict';
 
-const handlers = require('../../components/rss/handlers/posts'),
-      mongoose = require('../support/mongoose'),
+const handlers = require('../../../../components/rss/handlers/posts'),
       expect = require('chai').expect,
       trans = require('trans'),
-      factory = require('../support/factories/rss'),
+      factory = require('../../../support/factories/rss'),
       PATH = '/posts';
 
 function makeRequest(payload, params, query, pathname) {
@@ -16,11 +15,9 @@ function run(request, reply, method, done) {
   handlers[method](request, reply).then(() => done(), done);
 }
 
-describe('post handlers @mongo', () => {
-  before(done => mongoose.connect(['posts', 'feeds'], done));
-
+describe('post handlers crud @mongo', () => {
   describe('create', () => {
-    it('creates a post', done => {
+    it('returns the new post', done => {
       const request = makeRequest(factory.makePost().toObject()),
             reply = data => {
               expect(data.id).to.be.a('string');
@@ -56,7 +53,7 @@ describe('post handlers @mongo', () => {
   });
 
   describe('read', () => {
-    it('gets a post by id', done => {
+    it('returs the post matching an id', done => {
       const post = factory.makePostAndSave(),
             params = { id: post.get('id') },
             request = makeRequest(null, params),
@@ -83,7 +80,7 @@ describe('post handlers @mongo', () => {
   });
 
   describe('replace', () => {
-    it('replaces a post', done => {
+    it('returns the replaced post', done => {
       const oldPost = factory.makePostAndSave(),
             newPost = factory.makePost(),
             params = { id: oldPost.get('id') },
@@ -125,7 +122,7 @@ describe('post handlers @mongo', () => {
   });
 
   describe('update', () => {
-    it('updates a post', done => {
+    it('returns the updated post', done => {
       const oldPost = factory.makePostAndSave(),
             newPost = factory.makePost(),
             params = { id: oldPost.get('id') },
@@ -153,7 +150,7 @@ describe('post handlers @mongo', () => {
   });
 
   describe('delete', () => {
-    it('deletes a post', done => {
+    it('returns the deleted post', done => {
       const post = factory.makePostAndSave(),
             params = { id: post.get('id') },
             request = makeRequest(null, params),

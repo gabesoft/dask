@@ -1,3 +1,5 @@
+'use strict';
+
 const mongoose = require('mongoose'),
       fakery = require('mongoose-fakery');
 
@@ -23,9 +25,44 @@ fakery.fake('post', mongoose.model('Post'), {
   title: fakery.g.alphanum(32)
 });
 
-module.exports = {
-  makeFeed: data => fakery.make('feed', data || {}),
-  makeFeedAndSave: data => fakery.makeAndSave('feed', data || {}),
-  makePost: data => fakery.make('post', data || {}),
-  makePostAndSave: data => fakery.makeAndSave('post', data || {})
-};
+class BaseFactory {
+  times(count, fn) {
+    let idx = 0;
+    const res = [];
+
+    for (idx = 0; idx < count; idx++) {
+      res.push(fn());
+    }
+
+    return res;
+  }
+}
+
+class Factory extends BaseFactory {
+  makeFeed(data) {
+    return fakery.make('feed', data || {});
+  }
+  makeFeedAndSave(data) {
+    return fakery.makeAndSave('feed', data || {});
+  }
+  makePost(data) {
+    return fakery.make('post', data || {});
+  }
+  makePostAndSave(data) {
+    return fakery.makeAndSave('post', data || {});
+  }
+  makeFeeds(count, data) {
+    return this.times(count, () => this.makeFeed(data));
+  }
+  makePosts(count, data) {
+    return this.times(count, () => this.makePost(data));
+  }
+  makeFeedsAndSave(count, data) {
+    return this.times(count, () => this.makeFeedAndSave(data));
+  }
+  makePostsAndSave(count, data) {
+    return this.times(count, () => this.makePostAndSave(data));
+  }
+}
+
+module.exports = new Factory();

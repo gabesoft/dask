@@ -1,11 +1,17 @@
 'use strict';
 
-const handlers = require('../handlers/posts');
+const handlers = require('../handlers/posts'),
+      Joi = require('joi');
 
 module.exports = [{
   method: 'GET',
   path: '/posts/{id}',
-  handler: handlers.readPost
+  config: {
+    handler: handlers.readPost,
+    validate: {
+      params: { id: Joi.string().regex(/^[0-9a-fA-F]{24}$/) }
+    }
+  }
 }, {
   method: 'POST',
   path: '/posts',
@@ -13,15 +19,30 @@ module.exports = [{
 }, {
   method: 'PUT',
   path: '/posts/{id}',
-  handler: handlers.replacePost
+  config: {
+    handler: handlers.replacePost,
+    validate: {
+      params: { id: Joi.string().regex(/^[0-9a-fA-F]{24}$/) }
+    }
+  }
 }, {
   method: 'PATCH',
   path: '/posts/{id}',
-  handler: handlers.updatePost
+  config: {
+    handler: handlers.updatePost,
+    validate: {
+      params: { id: Joi.string().regex(/^[0-9a-fA-F]{24}$/) }
+    }
+  }
 }, {
   method: 'DELETE',
   path: '/posts/{id}',
-  handler: handlers.deletePost
+  config: {
+    handler: handlers.deletePost,
+    validate: {
+      params: { id: Joi.string().regex(/^[0-9a-fA-F]{24}$/) }
+    }
+  }
 }, {
   method: 'GET',
   path: '/search/posts',
@@ -33,17 +54,29 @@ module.exports = [{
 }, {
   method: 'POST',
   path: '/bulk/posts',
-  handler: handlers.bulkCreatePosts
+  config: {
+    handler: handlers.bulkCreatePosts,
+    validate: { payload: Joi.array() }
+  }
 }, {
   method: 'PUT',
   path: '/bulk/posts',
-  handler: handlers.bulkReplacePosts
+  config: {
+    handler: handlers.bulkReplacePosts,
+    validate: { payload: Joi.array() }
+  }
 }, {
   method: 'PATCH',
   path: '/bulk/posts',
-  handler: handlers.bulkUpdatePosts
+  config: {
+    handler: handlers.bulkUpdatePosts,
+    validate: { payload: Joi.array() }
+  }
 }, {
   method: 'DELETE',
   path: '/bulk/posts',
-  handler: handlers.bulkDeletePosts
+  config: {
+    handler: handlers.bulkDeletePosts,
+    validate: { payload: Joi.array() }
+  }
 }];

@@ -6,7 +6,7 @@ MPR = $(MODULES)/mpr
 NODE_DEV = $(MODULES)/node-dev
 
 MONGO_TEST_PORT = $(shell node -pe 'require("./config/test.json").mongo.port')
-TESTS := $(shell find ./test -name '*.js' -not -path './test/support')
+TESTS := $(shell find ./test/components -name '*.js' -not -path './test/support')
 
 all: test
 
@@ -30,7 +30,7 @@ stop-test-mongo:
 	@mongo --port $(MONGO_TEST_PORT) admin --eval 'db.shutdownServer();'
 
 test-mongo:
-	-@NODE_ENV=test $(MOCHA) --grep @mongo $(TESTS)
+	-@NODE_ENV=test $(MOCHA) --grep @mongo $(TESTS) ./test/support/mongo-hooks.js
 
 test-simple:
 	-@NODE_ENV=test $(MOCHA) --grep @simple $(TESTS)
