@@ -1,6 +1,6 @@
 const mongoose = require('mongoose'),
-      md5 = require('../core/lib/md5-hash'),
-      schema = require('../core/lib/mongoose-schema'),
+      md5 = require('../core/md5-hash'),
+      schema = require('../core/mongoose-schema'),
       Types = mongoose.Schema.Types;
 
 const Url = schema.create({

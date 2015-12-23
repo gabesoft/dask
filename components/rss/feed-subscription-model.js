@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose'),
       Types = mongoose.Schema.Types,
-      schema = require('../core/lib/mongoose-schema');
+      schema = require('../core/mongoose-schema');
 
 const FeedSubscription = schema.create({
   userId: { type: Types.ObjectId, ref: 'User', required: true },

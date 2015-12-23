@@ -1,9 +1,9 @@
 'use strict';
 
 var mongoose = require('mongoose')
-  , md5      = require('../core/lib/md5-hash')
+  , md5      = require('../core/md5-hash')
   , Types    = mongoose.Schema.Types
-  , schema   = require('../core/lib/mongoose-schema')
+  , schema   = require('../core/mongoose-schema')
   , Query    = null;
 
 function queryName (name, expression) {

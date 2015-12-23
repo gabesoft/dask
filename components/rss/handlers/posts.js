@@ -3,7 +3,7 @@
 const PostModel = require('../post-model'),
       responder = require('../../core/responder'),
       Promise = require('bluebird').Promise,
-      // DataQuery = require('../../core/lib/data-query').DataQuery,
+      // DataQuery = require('../../core/data-query').DataQuery,
       searcher = require('../searcher');
 
 // function updateUserPosts(request, reply) {

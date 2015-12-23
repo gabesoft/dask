@@ -1,5 +1,5 @@
 const mongoose = require('mongoose'),
-      schema = require('../core/lib/mongoose-schema');
+      schema = require('../core/mongoose-schema');
 
 /*
  * Model that represents a vim plugin

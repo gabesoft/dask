@@ -5,7 +5,7 @@ const FeedModel = require('./feed-model'),
       FeedSubModel = require('./feed-subscription-model'),
       PostModel = require('./post-model'),
       RecordNotFound = require('../core/errors/record-not-found'),
-      DataQuery = require('../core/lib/data-query').DataQuery,
+      DataQuery = require('../core/data-query').DataQuery,
       noop = () => {},
       url = require('url');
 

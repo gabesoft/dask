@@ -2,7 +2,7 @@
 
 var Vplug     = require('./vplug-model')
   , NotFound  = require('../core/errors/record-not-found')
-  , DataQuery = require('../core/lib/data-query').DataQuery
+  , DataQuery = require('../core/data-query').DataQuery
   , url       = require('url');
 
 function findOrCreate (opts, cb) {

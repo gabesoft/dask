@@ -1,6 +1,6 @@
 const mongoose = require('mongoose'),
       Types = mongoose.Schema.Types,
-      schema = require('../core/lib/mongoose-schema');
+      schema = require('../core/mongoose-schema');
 
 function username () {
   const pat1 = Math.random().toString(36).slice(2),

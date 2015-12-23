@@ -49,7 +49,6 @@ describe('post handlers bulk @mongo', () => {
 
       run(request, reply, 'bulkCreatePosts', done);
     });
-
   });
 
   describe('replace', () => {

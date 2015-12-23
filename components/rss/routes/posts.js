@@ -1,7 +1,7 @@
 'use strict';
 
 const handlers = require('../handlers/posts'),
-      Joi = require('joi');
+      Joi = require('../../core/joi');
 
 module.exports = [{
   method: 'GET',
@@ -9,7 +9,7 @@ module.exports = [{
   config: {
     handler: handlers.readPost,
     validate: {
-      params: { id: Joi.string().regex(/^[0-9a-fA-F]{24}$/) }
+      params: { id: Joi.objectId() }
     }
   }
 }, {
@@ -22,7 +22,7 @@ module.exports = [{
   config: {
     handler: handlers.replacePost,
     validate: {
-      params: { id: Joi.string().regex(/^[0-9a-fA-F]{24}$/) }
+      params: { id: Joi.objectId() }
     }
   }
 }, {
@@ -31,7 +31,7 @@ module.exports = [{
   config: {
     handler: handlers.updatePost,
     validate: {
-      params: { id: Joi.string().regex(/^[0-9a-fA-F]{24}$/) }
+      params: { id: Joi.objectId() }
     }
   }
 }, {
@@ -40,7 +40,7 @@ module.exports = [{
   config: {
     handler: handlers.deletePost,
     validate: {
-      params: { id: Joi.string().regex(/^[0-9a-fA-F]{24}$/) }
+      params: { id: Joi.objectId() }
     }
   }
 }, {

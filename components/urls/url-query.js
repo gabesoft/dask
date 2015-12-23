@@ -1,7 +1,7 @@
 'use strict';
 
 const parser = require('./query-parser'),
-      DataQuery = require('../core/lib/data-query').DataQuery,
+      DataQuery = require('../core/data-query').DataQuery,
       InvalidQueryError = require('../core/errors/invalid-query');
 
 class Query extends DataQuery {

@@ -1,7 +1,7 @@
 'use strict';
 
 const mongoose = require('mongoose'),
-      timestamp = require('../mongoose-plugins/timestamp'),
+      timestamp = require('./mongoose-plugins/timestamp'),
       Schema = mongoose.Schema,
       extend = require('util')._extend,
       transform = function schemaTransform(doc, ret) {
