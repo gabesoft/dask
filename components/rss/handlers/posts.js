@@ -3,7 +3,7 @@
 const PostModel = require('../post-model'),
       responder = require('../../core/responder'),
       Promise = require('bluebird').Promise,
-      // DataQuery = require('../../core/data-query').DataQuery,
+      capitalize = require('lodash').capitalize,
       searcher = require('../searcher');
 
 // function updateUserPosts(request, reply) {
@@ -39,18 +39,37 @@ const PostModel = require('../post-model'),
 //     .then(docs => reply(docs.map(doc => doc.toObject())), e => reply.boom(e));
 // }
 
+function searchPosts(request, reply) {
+  const rquery = request.query || {},
+        payload = request.payload || {},
+        query = rquery.query || payload.query || {},
+        skip = (rquery.skip || rquery.from) || (payload.skip || payload.from) || 0,
+        limit = (rquery.limit || rquery.size) || (payload.limit || payload.size) || 10000,
+        sort = payload.sort,
+        fields = Array.isArray(payload.fields) ? payload.fields.join(' ') : payload.fields;
+
+  return PostModel
+    .find(query, fields)
+    .skip(skip)
+    .limit(limit)
+    .sort(sort)
+    .exec()
+    .then(responder.searchSuccess(request, reply),
+          responder.searchFailure(request, reply));
+}
+
 function remove(id) {
   return PostModel.findById(id).then(doc => doc ? doc.remove() : null);
 }
 
 function update(data, id) {
   return PostModel
-    .findById(id || data.id)
+    .findById(data.id || id)
     .then(doc => doc ? doc.set(data || {}).save() : null);
 }
 
 function replace(data, id) {
-  const opts = { new: true, runValidators: true };
+  const opts = { new: true, upsert: false, runValidators: true };
 
   data = Object.assign({ $unset: {} }, data || {});
 
@@ -59,7 +78,7 @@ function replace(data, id) {
     .filter(path => !(path in data))
     .forEach(path => data.$unset[path] = 1);
 
-  return PostModel.findOneAndUpdate({ _id: id || data.id }, data, opts);
+  return PostModel.findOneAndUpdate({ _id: data.id || id }, data, opts);
 }
 
 function create(data) {
@@ -70,40 +89,33 @@ function read(id) {
   return PostModel.findById(id);
 }
 
-function bulkDeletePosts(request, reply) {
+function bulk(request, reply, op) {
+  const method = `bulk${capitalize(op.name)}d`,
+        promises = (request.payload || [])
+          .map(op)
+          .map(promise => Promise.resolve(promise).reflect());
 
+  return Promise
+    .all(promises)
+    .map(promise => promise.isFulfilled() ? promise.value() : promise.reason())
+    .then(responder[`${method}Success`](request, reply),
+          responder[`${method}Failure`](request, reply));
+}
+
+function bulkRemovePosts(request, reply) {
+  return bulk(request, reply, remove);
 }
 
 function bulkUpdatePosts(request, reply) {
-
+  return bulk(request, reply, update);
 }
 
 function bulkReplacePosts(request, reply) {
-  const promises = (request.payload || [])
-          .map(replace)
-          .map(promise => Promise.resolve(promise).reflect());
-
-  return Promise
-    .all(promises)
-    .map(promise => promise.isFulfilled() ? promise.value() : promise.reason())
-    .then(responder.bulkReplacedSuccess(request, reply),
-          responder.bulkReplacedFailure(request, reply));
+  return bulk(request, reply, replace);
 }
 
 function bulkCreatePosts(request, reply) {
-  const promises = (request.payload || [])
-          .map(create)
-          .map(promise => Promise.resolve(promise).reflect());
-
-  return Promise
-    .all(promises)
-    .map(promise => promise.isFulfilled() ? promise.value() : promise.reason())
-    .then(responder.bulkCreatedSuccess(request, reply),
-          responder.bulkCreatedFailure(request, reply));
-}
-
-function searchPosts(request, reply) {
-
+  return bulk(request, reply, create);
 }
 
 function deletePost(request, reply) {
@@ -138,7 +150,7 @@ function readPost(request, reply) {
 
 module.exports = {
   bulkCreatePosts,
-  bulkDeletePosts,
+  bulkRemovePosts,
   bulkReplacePosts,
   bulkUpdatePosts,
   createPost,

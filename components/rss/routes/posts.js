@@ -3,6 +3,8 @@
 const handlers = require('../handlers/posts'),
       Joi = require('../../core/joi');
 
+// TODO: validate bulk delete input
+
 module.exports = [{
   method: 'GET',
   path: '/posts/{id}',
@@ -77,6 +79,6 @@ module.exports = [{
   path: '/bulk/posts',
   config: {
     handler: handlers.bulkDeletePosts,
-    validate: { payload: Joi.array() }
+    validate: { payload: Joi.array().items(Joi.objectId()) }
   }
 }];

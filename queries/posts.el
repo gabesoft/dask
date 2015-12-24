@@ -86,6 +86,11 @@ GET :base/posts/
 # post delete
 # DELETE :base/posts/5677a14921a210927374a8de
 
+# post bulk delete - invalid
+DELETE :base/bulk/posts
+Content-type: :content-type
+[ "1", "2", "3" ]
+
 # bulk post creation - non array input
 POST :base/bulk/posts
 Content-type: :content-type

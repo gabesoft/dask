@@ -22,22 +22,23 @@ serve:
 run:
 	@$(MPR) run mpr.json
 
-start-test-mongo:
+start-mongo-test:
 	@ulimit -n 2048 && \
 	mongod --port $(MONGO_TEST_PORT) --dbpath /tmp --fork --logpath /tmp/mongo-test.log
 
-stop-test-mongo:
+stop-mongo-test:
 	@mongo --port $(MONGO_TEST_PORT) admin --eval 'db.shutdownServer();'
 
-test-mongo:
+run-test-mongo:
 	-@NODE_ENV=test $(MOCHA) --grep @mongo $(TESTS) ./test/support/mongo-hooks.js
 
-test-simple:
+run-test-simple:
 	-@NODE_ENV=test $(MOCHA) --grep @simple $(TESTS)
 
-run-test-mongo: start-test-mongo test-mongo stop-test-mongo
-run-test-simple: test-simple
-run-test-all: run-test-simple run-test-mongo
+test-mongo: start-mongo-test run-test-mongo stop-mongo-test
+test-simple: run-test-simple
+test-all: test-simple test-mongo
+test: test-all
 
 lint:
 	@eslint .

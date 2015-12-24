@@ -5,8 +5,8 @@ const Boom = require('boom'),
 
 function getBody(data) {
   const isModel = data && data.constructor.name === 'model',
-        isMongoError = data.errmsg && (data.code === 11000 || data.code === 11001),
-        isError = Boolean(data.errors);
+        isMongoError = data && data.errmsg && (data.code === 11000 || data.code === 11001),
+        isError = Boolean(data && data.errors);
 
   if (isMongoError) {
     return Object.assign({ isError: true }, data.toJSON());
@@ -76,6 +76,14 @@ function readFailure(request, reply) {
   return err => processError(reply, err);
 }
 
+function searchSuccess(request, reply) {
+  return data => reply(data.map(getBody));
+}
+
+function searchFailure(request, reply) {
+  return err => processError(reply, err);
+}
+
 module.exports = {
   createdSuccess,
   createdFailure,
@@ -83,12 +91,18 @@ module.exports = {
   bulkCreatedFailure,
   bulkReplacedSuccess: bulkCreatedSuccess,
   bulkReplacedFailure: bulkCreatedFailure,
+  bulkUpdatedSuccess: bulkCreatedSuccess,
+  bulkUpdatedFailure: bulkCreatedFailure,
+  bulkRemovedSuccess: bulkCreatedSuccess,
+  bulkRemovedFailure: bulkCreatedFailure,
   replacedSuccess: readSuccess,
   replacedFailure,
   updatedSuccess: readSuccess,
   updatedFailure: replacedFailure,
   deletedSuccess: readSuccess,
   deletedFailure,
+  searchSuccess,
+  searchFailure,
   readSuccess,
   readFailure
 };

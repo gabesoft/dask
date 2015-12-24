@@ -52,14 +52,55 @@ describe('post handlers bulk @mongo', () => {
   });
 
   describe('replace', () => {
-
+    it('returns the replaced posts', done => {
+      const existing = factory.makePostsAndSave(3),
+            newPosts = factory.makePosts(3),
+            payload = existing.map((post, index) => {
+              const data = newPosts[index].toObject();
+              return Object.assign(data, { id: post.get('id') });
+            }),
+            request = makeRequest(payload),
+            reply = data => expect(data).to.eql(payload);
+      run(request, reply, 'bulkReplacePosts', done);
+    });
   });
 
   describe('update', () => {
-
+    it('returns the updated posts', done => {
+      const existing = factory.makePostsAndSave(3),
+            newPosts = factory.makePosts(3),
+            payload = existing.map((post, index) => {
+              const data = newPosts[index].toObject();
+              return Object.assign(data, { id: post.get('id') });
+            }),
+            request = makeRequest(payload),
+            reply = data => expect(data).to.eql(payload);
+      run(request, reply, 'bulkUpdatePosts', done);
+    });
   });
 
   describe('delete', () => {
+    it('returns the deleted posts', done => {
+      const posts = factory.makePostsAndSave(3),
+            postsData = posts.map(post => post.toObject()),
+            payload = posts.map(post => post.get('id')),
+            request = makeRequest(payload),
+            reply = data => expect(data).to.eql(postsData);
+      run(request, reply, 'bulkRemovePosts', done);
+    });
 
+    it('returns null for not found posts', done => {
+      const posts = factory.makePostsAndSave(3),
+            temp = factory.makePosts(2),
+            payload = posts
+              .map(post => post.get('id'))
+              .concat(temp.map(post => post.get('id'))),
+            request = makeRequest(payload),
+            reply = data => {
+              const actual = data.map(post => post === null);
+              expect(actual).to.eql([false, false, false, true, true]);
+            };
+      run(request, reply, 'bulkRemovePosts', done);
+    });
   });
 });
