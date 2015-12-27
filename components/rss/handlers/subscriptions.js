@@ -79,7 +79,7 @@ function createSubscription(request, reply) {
           reply.boom(err);
         } else {
           reply(doc.toObject());
-          indexer.addPosts(doc.toObject(), null, true);
+          indexer.addPosts(doc.toObject(), null, { read: true });
         }
       });
     }, e => reply.boom(e));
@@ -99,7 +99,7 @@ function removeSubscription(request, reply) {
           reply.boom(err);
         } else {
           reply(doc.toObject());
-          indexer.deletePosts(doc.toObject());
+          indexer.deletePosts(doc.get('id'));
         }
       });
     }, e => reply.boom(e));
@@ -147,15 +147,15 @@ function indexPosts(request, reply) {
   FeedSubModel
     .findById(request.payload.subscriptionId)
     .lean()
-    .then(subscription => indexer.addPosts(subscription, query, read))
+    .then(subscription => indexer.addPosts(subscription, query, { read }))
     .then(reply, e => reply.boom(e));
 }
 
 module.exports = {
-  createSubscription: createSubscription,
-  getFeedSubscription: getFeedSubscription,
-  getFeedSubscriptions: getFeedSubscriptions,
-  indexPosts: indexPosts,
-  removeSubscription: removeSubscription,
-  updateSubscription: updateSubscription
+  createSubscription,
+  getFeedSubscription,
+  getFeedSubscriptions,
+  indexPosts,
+  removeSubscription,
+  updateSubscription
 };

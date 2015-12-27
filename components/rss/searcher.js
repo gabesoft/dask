@@ -62,7 +62,10 @@ function index(posts, update) {
 
   return client
     .bulk({ body })
-    .then(() => client.indices.refresh({ index: indexName }));
+    .then(results => client
+          .indices
+          .refresh({ index: indexName })
+          .then(() => results.items.map(item => item.index || item.update)));
 }
 
 function remove(posts) {
@@ -77,14 +80,17 @@ function remove(posts) {
   });
   return client
     .bulk({ body })
-    .then(() => client.indices.refresh({ index: indexName }));
+    .then(results => client
+          .indices
+          .refresh({ index: indexName })
+          .then(() => results.items.map(item => item.delete)));
 }
 
 module.exports = {
   index: posts => index(posts, false),
   update: posts => index(posts, true),
-  remove: remove,
-  search: search,
-  scroll: scroll,
-  count: count
+  remove,
+  search,
+  scroll,
+  count
 };

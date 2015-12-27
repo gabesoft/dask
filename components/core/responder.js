@@ -37,7 +37,7 @@ function processError(reply, err) {
 
 function createdSuccess(request, reply) {
   return data => {
-    const locationUrl = `${request.url.pathname}/${data.id}`;
+    const locationUrl = `${request.url.pathname}/${data.id || data._id}`;
     return reply(getBody(data)).created(locationUrl);
   };
 }

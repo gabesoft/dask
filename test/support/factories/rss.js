@@ -1,10 +1,14 @@
 'use strict';
 
 const mongoose = require('mongoose'),
-      fakery = require('mongoose-fakery');
+      fakery = require('mongoose-fakery'),
+      searcher = require('../../../components/rss/searcher'),
+      indexer = require('../../../components/rss/indexer');
 
 require('../../../components/rss/feed-model');
 require('../../../components/rss/post-model');
+require('../../../components/rss/feed-subscription-model');
+require('../../../components/users/user-model');
 
 fakery.fake('feed', mongoose.model('Feed'), {
   author: fakery.g.name(),
@@ -23,6 +27,19 @@ fakery.fake('post', mongoose.model('Post'), {
   feedId: fakery.make('feed').get('id'),
   link: fakery.g.alphanum(32),
   title: fakery.g.alphanum(32)
+});
+
+fakery.fake('user', mongoose.model('User'), {
+  email: fakery.g.name(),
+  password: fakery.g.alphanum(32),
+  type: 'test'
+});
+
+fakery.fake('subscription', mongoose.model('FeedSubscription'), {
+  userId: fakery.make('user').get('id'),
+  feedId: fakery.make('feed').get('id'),
+  title: fakery.g.alphanum(32),
+  tags: []
 });
 
 class BaseFactory {
@@ -50,6 +67,45 @@ class Factory extends BaseFactory {
   }
   makePostAndSave(data) {
     return fakery.makeAndSave('post', data || {});
+  }
+  makeUser(data) {
+    return fakery.make('user', data || {});
+  }
+  makeUserAndSave(data) {
+    return fakery.makeAndSave('user', data || {});
+  }
+  makeSubscription(data) {
+    return fakery.make('subscription', data || {});
+  }
+  makeSubscriptionAndSave(data, cb) {
+    return fakery.makeAndSave('subscription', data || {}, cb);
+  }
+  makeUserPost(data) {
+    data = data || {};
+    const feed = this.makeFeed(data.feed || {}),
+          post = this.makePost(Object.assign({ feedId: feed.get('id') }, data.post || {})),
+          sub = this.makeSubscription(Object.assign({ feedId: feed.get('id') }, data.subscription || {}));
+    return indexer.makeUserPosts(sub.toObject(), [post.toOBject()], data.userPost)[0];
+  }
+  makeUserPostAndSave(data) {
+    data = data || {};
+    const feed = this.makeFeedAndSave(data.feed || {}),
+          post = this.makePostAndSave(Object.assign({ feedId: feed.get('id') }, data.post || {})),
+          sub = this.makeSubscriptionAndSave(Object.assign({ feedId: feed.get('id') }, data.subscription || {})),
+          userPosts = indexer.makeUserPosts(sub.toObject(), [post.toObject()], data.userPost);
+    return searcher.index(userPosts).then(results => {
+      return Object.assign(results[0], { _source: userPosts[0] });
+    });
+  }
+  makeUserPostsAndSave(count, data) {
+    data = data || {};
+    const feed = this.makeFeedAndSave(data.feed || {}),
+          posts = this.makePostsAndSave(count, Object.assign({ feedId: feed.get('id') }, data.post || {})),
+          sub = this.makeSubscriptionAndSave(Object.assign({ feedId: feed.get('id') }, data.subscription || {})),
+          userPosts = indexer.makeUserPosts(sub.toObject(), posts.map(post => post.toObject()), data.userPost);
+    return searcher.index(userPosts).then(results => {
+      return results.map((result, index) => Object.assign(result, { _source: userPosts[index] }));
+    });
   }
   makeFeeds(count, data) {
     return this.times(count, () => this.makeFeed(data));

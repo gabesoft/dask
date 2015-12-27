@@ -3,41 +3,7 @@
 const PostModel = require('../post-model'),
       responder = require('../../core/responder'),
       Promise = require('bluebird').Promise,
-      capitalize = require('lodash').capitalize,
-      searcher = require('../searcher');
-
-// function updateUserPosts(request, reply) {
-//   const ids = request.params.ids.split('/'),
-//         posts = ids.map(id => Object.assign({ _id: id }, request.payload || {}));
-//   return searcher.update(posts).then(reply, e => reply.boom(e));
-// }
-
-// function searchPostsOld(request, reply) {
-//   const input = request.query || {},
-//         fields = (input.fields || '').split('~').filter(Boolean),
-//         query = new DataQuery();
-
-//   PostModel.schema.eachPath(path => {
-//     if (input[path]) {
-//       query.andCriteria(path, input[path]);
-//     }
-//   });
-
-//   query.parseSort(input.sort || 'date:desc');
-//   query.addLimit(input.limit);
-//   query.addSkip(input.skip);
-
-//   fields.forEach(field => query.addField(field, 1));
-
-//   if (query.error) {
-//     return reply.boom(query.error);
-//   }
-
-//   query
-//     .getQuery(PostModel)
-//     .exec()
-//     .then(docs => reply(docs.map(doc => doc.toObject())), e => reply.boom(e));
-// }
+      capitalize = require('lodash').capitalize;
 
 function searchPosts(request, reply) {
   const rquery = request.query || {},
@@ -46,7 +12,7 @@ function searchPosts(request, reply) {
         skip = (rquery.skip || rquery.from) || (payload.skip || payload.from) || 0,
         limit = (rquery.limit || rquery.size) || (payload.limit || payload.size) || 10000,
         sort = payload.sort,
-        fields = Array.isArray(payload.fields) ? payload.fields.join(' ') : payload.fields;
+        fields = rquery.fields || (Array.isArray(payload.fields) ? payload.fields.join(' ') : payload.fields);
 
   return PostModel
     .find(query, fields)
@@ -71,6 +37,7 @@ function update(data, id) {
 function replace(data, id) {
   const opts = { new: true, upsert: false, runValidators: true };
 
+  id = data.id || id;
   data = Object.assign({ $unset: {} }, data || {});
 
   PostModel.schema
@@ -78,7 +45,7 @@ function replace(data, id) {
     .filter(path => !(path in data))
     .forEach(path => data.$unset[path] = 1);
 
-  return PostModel.findOneAndUpdate({ _id: data.id || id }, data, opts);
+  return PostModel.findOneAndUpdate({ _id: id }, data, opts);
 }
 
 function create(data) {

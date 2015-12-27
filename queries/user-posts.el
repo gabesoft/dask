@@ -11,8 +11,55 @@
 #
 
 # variables
+:base = http://localhost:8006
 :search-url = http://10.0.1.2:9200/.dev-dask-rss/post/_search?pretty
 :content-type = application/json
+
+# get by id
+GET :base/user-posts/563aec31d9ccd0b9cf91b80a-5662bdff0eb8c31981983f54
+
+# search by id
+POST :search-url
+Content-type: :content-type
+{
+    "query": {
+        "term": {
+            "_id": "563aec31d9ccd0b9cf91b80a-5662bdff0eb8c31981983f54"
+        }
+    }
+}
+
+# search by post id
+POST :search-url
+Content-type: :content-type
+{
+    "query": {
+        "term": {
+            "postId": "563aec31d9ccd0b9cf91b80a"
+        }
+    }
+}
+
+# multiple by id
+POST :search-url
+Content-type: :content-type
+{
+    "query": {
+        "terms": {
+            "_id": [
+                "563aec40d9ccd0b9cf91c909-566333340eb8c31981983fd7",
+                "563aec41d9ccd0b9cf91c9a3-566333340eb8c31981983fd7",
+                "563aec3fd9ccd0b9cf91c795-566333450eb8c31981983fd8"
+            ]
+        }
+    },
+    "fields": [
+        "feedId",
+        "subscriptionId",
+        "userId"
+    ]
+}
+
 
 #
 POST :search-url

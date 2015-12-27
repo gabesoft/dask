@@ -8,7 +8,7 @@ const FeedSubscription = schema.create({
   userId: { type: Types.ObjectId, ref: 'User', required: true },
   feedId: { type: Types.ObjectId, ref: 'Feed', required: true },
   title: { type: String },
-  tags: { type: [String], index: true, required: true, default: [] },
+  tags: { type: [String], index: true },
   notes: { type: String },
   disabled: { type: Boolean, required: true, default: false }
 }, null, true);

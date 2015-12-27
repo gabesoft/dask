@@ -153,7 +153,7 @@ function removeFeed(request, reply) {
       .findOne({ feedId: request.params.id })
       .then(doc => {
         doc.remove();
-        return indexer.deletePosts(doc.toObject());
+        return indexer.deletePosts(doc.get('id'));
       })
       .then(() => console.log('subscription deleted'), console.log.bind(console));
   });
@@ -180,14 +180,14 @@ function updatePost(request, reply) {
 }
 
 module.exports = {
-  createFeed: createFeed,
-  createPost: createPost,
-  readFeed: readFeed,
-  readPost: readPost,
-  removeFeed: removeFeed,
-  removePost: removePost,
-  searchFeeds: searchFeeds,
-  searchPosts: searchPosts,
-  updateFeed: updateFeed,
-  updatePost: updatePost
+  createFeed,
+  createPost,
+  readFeed,
+  readPost,
+  removeFeed,
+  removePost,
+  searchFeeds,
+  searchPosts,
+  updateFeed,
+  updatePost
 };

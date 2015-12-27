@@ -130,3 +130,11 @@ Content-type: :content-type
     "tags": [ "javascript", "test" ],
     "title": "Test title"
 }]
+
+# search posts
+POST :base/search/posts
+Content-type: :content-type
+{
+  "query": { "feedId": "563aec31d9ccd0b9cf91b804" },
+  "fields": "title feedId author"
+}

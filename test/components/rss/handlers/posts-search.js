@@ -44,12 +44,13 @@ describe('post handlers search @mongo', () => {
     run(request, reply, done);
   });
 
-  it('returns only the required records by start and limit', done => {
+  it('returns only the required records specified start and limit', done => {
     const request = makeRequest(null, null, null, 3, 10),
           reply = data => {
             const expected = ids.slice(3, 13);
             expect(data.map(post => post.id)).to.eql(expected);
           };
+
     run(request, reply, done);
   });
 
