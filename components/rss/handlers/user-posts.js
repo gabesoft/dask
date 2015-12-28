@@ -5,6 +5,8 @@ const searcher = require('../searcher'),
       indexer = require('../indexer'),
       Subscription = require('../feed-subscription-model');
 
+// TODO: implement search (add routes too)
+
 function readPost(request, reply) {
   return searcher
     .search({
@@ -25,23 +27,25 @@ function ensureExists(doc, name, id) {
   }
 }
 
-function indexPost(subscriptionId, postId, data) {
+function indexPosts(subscriptionId, query, data) {
+  query = query || {};
   return Subscription
     .findById(subscriptionId)
     .lean()
     .then(sub => ensureExists(sub, 'subscription', subscriptionId))
-    .then(sub => indexer.addPosts(sub, { _id: postId }, data))
+    .then(sub => indexer.addPosts(sub, Object.assign({ feedId: sub.feedId }, query), data))
     .then(results => searcher.search({
-      body: { query: { term: { _id: (results || [])[0]._id } } }
+      body: { query: { terms: { _id: results.map(result => result._id) } } }
     }))
-    .then(results => results.hits.hits[0]);
+    .then(results => results.hits.hits);
 }
 
 function createPost(request, reply) {
   const params = request.params || {},
         data = request.payload || {};
 
-  return indexPost(params.subscriptionId, params.postId, data)
+  return indexPosts(params.subscriptionId, { _id: params.postId }, data)
+    .then(results => results[0])
     .then(responder.createdSuccess(request, reply),
           responder.createdFailure(request, reply));
 }
@@ -50,7 +54,8 @@ function updatePost(request, reply) {
   const params = request.params || {},
         data = request.payload || {};
 
-  return indexPost(params.subscriptionId, params.postId, data)
+  return indexPosts(params.subscriptionId, { _id: params.postId }, data)
+    .then(results => results[0])
     .then(responder.updatedSuccess(request, reply),
           responder.updatedFailure(request, reply));
 }
@@ -61,15 +66,7 @@ function bulkCreatePosts(request, reply) {
         data = request.payload.data || {},
         query = ids.length > 0 ? { _id: { $in: ids } } : {};
 
-  return Subscription
-    .findById(subscriptionId)
-    .lean()
-    .then(sub => ensureExists(sub, 'subscription', subscriptionId))
-    .then(sub => indexer.addPosts(sub, Object.assign({ feedId: sub.feedId }, query), data))
-    .then(results => searcher.search({
-      body: { query: { terms: { _id: results.map(result => result._id) } } }
-    }))
-    .then(results => results.hits.hits)
+  return indexPosts(subscriptionId, query, data)
     .then(responder.bulkCreatedSuccess(request, reply),
           responder.bulkCreatedFailure(request, reply));
 }

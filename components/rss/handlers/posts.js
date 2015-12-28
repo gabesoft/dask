@@ -2,24 +2,19 @@
 
 const PostModel = require('../post-model'),
       responder = require('../../core/responder'),
-      Promise = require('bluebird').Promise,
-      capitalize = require('lodash').capitalize;
+      Helper = require('../../core/handlers-helper'),
+      helper = new Helper(PostModel);
 
-function searchPosts(request, reply) {
-  const rquery = request.query || {},
-        payload = request.payload || {},
-        query = rquery.query || payload.query || {},
-        skip = (rquery.skip || rquery.from) || (payload.skip || payload.from) || 0,
-        limit = (rquery.limit || rquery.size) || (payload.limit || payload.size) || 10000,
-        sort = payload.sort,
-        fields = rquery.fields || (Array.isArray(payload.fields) ? payload.fields.join(' ') : payload.fields);
+function searchViaGet(request, reply) {
+  return helper
+    .searchViaGet(request)
+    .then(responder.searchSuccess(request, reply),
+          responder.searchFailure(request, reply));
+}
 
-  return PostModel
-    .find(query, fields)
-    .skip(skip)
-    .limit(limit)
-    .sort(sort)
-    .exec()
+function searchViaPost(request, reply) {
+  return helper
+    .searchViaPost(request)
     .then(responder.searchSuccess(request, reply),
           responder.searchFailure(request, reply));
 }
@@ -56,36 +51,35 @@ function read(id) {
   return PostModel.findById(id);
 }
 
-function bulk(request, reply, op) {
-  const method = `bulk${capitalize(op.name)}d`,
-        promises = (request.payload || [])
-          .map(op)
-          .map(promise => Promise.resolve(promise).reflect());
-
-  return Promise
-    .all(promises)
-    .map(promise => promise.isFulfilled() ? promise.value() : promise.reason())
-    .then(responder[`${method}Success`](request, reply),
-          responder[`${method}Failure`](request, reply));
-}
-
 function bulkRemovePosts(request, reply) {
-  return bulk(request, reply, remove);
+  return helper
+    .bulkRemove(request.payload)
+    .then(responder.bulkRemovedSuccess(request, reply),
+          responder.bulkRemovedFailure(request, reply));
 }
 
 function bulkUpdatePosts(request, reply) {
-  return bulk(request, reply, update);
+  return helper
+    .bulkUpdate(request.payload)
+    .then(responder.bulkUpdatedSuccess(request, reply),
+          responder.bulkUpdatedFailure(request, reply));
 }
 
 function bulkReplacePosts(request, reply) {
-  return bulk(request, reply, replace);
+  return helper
+    .bulkReplace(request.payload)
+    .then(responder.bulkReplacedSuccess(request, reply),
+          responder.bulkReplacedFailure(request, reply));
 }
 
 function bulkCreatePosts(request, reply) {
-  return bulk(request, reply, create);
+  return helper
+    .bulkCreate(request.payload)
+    .then(responder.bulkCreatedSuccess(request, reply),
+          responder.bulkCreatedFailure(request, reply));
 }
 
-function deletePost(request, reply) {
+function removePost(request, reply) {
   return remove(request.params.id)
     .then(responder.deletedSuccess(request, reply),
           responder.deletedFailure(request, reply));
@@ -121,9 +115,10 @@ module.exports = {
   bulkReplacePosts,
   bulkUpdatePosts,
   createPost,
-  deletePost,
+  removePost,
   readPost,
   replacePost,
-  searchPosts,
+  searchViaGet,
+  searchViaPost,
   updatePost
 };

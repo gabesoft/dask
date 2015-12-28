@@ -23,7 +23,7 @@ Content-type: :content-type
     "date": "2015-05-12T00:00:00.000Z",
     "description": "Test description",
     "feedId": "563aec31d9ccd0b9cf91b804",
-    "guid": "sample-post-1",
+    "guid": "sample-post-10",
     "link": "http://sample-posts.com/sample-post-1",
     "pubdate": "2015-05-12T00:00:00.000Z",
     "tags": [ "javascript", "test" ],
@@ -136,5 +136,7 @@ POST :base/search/posts
 Content-type: :content-type
 {
   "query": { "feedId": "563aec31d9ccd0b9cf91b804" },
-  "fields": "title feedId author"
+  "fields": "title feedId author",
+  "limit": 5,
+  "skip": 0
 }

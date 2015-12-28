@@ -13,12 +13,15 @@ describe('post handlers search @mongo', () => {
   }
 
   function run(request, reply, done) {
-    handlers.searchPosts(request, reply).then(() => done(), done);
+    handlers.searchViaPost(request, reply).then(() => done(), done);
   }
 
-  before(() => {
-    posts = factory.makePostsAndSave(30);
-    ids = posts.map(post => post.get('id'));
+  before(done => {
+    factory.makePostsAndSave(30).then(data => {
+      posts = data;
+      ids = posts.map(post => post.get('id'));
+      done();
+    });
   });
 
   it('returns an array even for a single element', done => {

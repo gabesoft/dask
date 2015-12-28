@@ -6,12 +6,15 @@ const Boom = require('boom'),
 function getBody(data) {
   const isModel = data && data.constructor.name === 'model',
         isMongoError = data && data.errmsg && (data.code === 11000 || data.code === 11001),
-        isError = Boolean(data && data.errors);
+        isError = Boolean(data && data.errors),
+        isErrorObject = data instanceof Error;
 
   if (isMongoError) {
     return Object.assign({ isError: true }, data.toJSON());
   } else if (isError) {
     return Object.assign({ isError: true }, data);
+  } else if (isErrorObject) {
+    return Object.assign({ isError: true }, { message: data.message });
   } else if (isModel) {
     return data.toObject();
   }

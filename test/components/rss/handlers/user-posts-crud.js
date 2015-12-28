@@ -3,7 +3,6 @@
 const handlers = require('../../../../components/rss/handlers/user-posts'),
       expect = require('chai').expect,
       factory = require('../../../support/factories/rss'),
-      Promise = require('bluebird').Promise,
       PATH = '/user-posts';
 
 function makeRequest(payload, params, query, pathname) {
@@ -18,25 +17,17 @@ function run(request, reply, method, done) {
 describe('user post handlers crud @mongo @elastic', () => {
   describe('create', () => {
     it('returns the new user post', done => {
-      const user = factory.makeUserAndSave(),
-            feed = factory.makeFeedAndSave(),
-            post = factory.makePostAndSave({ feedId: feed.get('id') }),
-            sub = factory.makeSubscriptionAndSave({
-              userId: user.get('id'),
-              feedId: feed.get('id')
-            });
-
-      Promise.all([user, feed, post, sub]).then(() => {
-        const request = makeRequest(null, {
-          subscriptionId: sub.get('id'),
-          postId: post.get('id')
-        });
-        const reply = data => {
-          expect(data._source.subscriptionId).to.equal(sub.id);
-          return { created: (url) => expect(url).to.equal(`${PATH}/${data._id}`) };
-        };
-        run(request, reply, 'createPost', done);
-      }, done);
+      factory.makeSubscriptionAndPostsAndSave(1)
+        .then(results => {
+          const postId = results.posts[0].get('id'),
+                subscriptionId = results.subscription.get('id');
+          const request = makeRequest(null, { subscriptionId, postId });
+          const reply = data => {
+            expect(data._source.subscriptionId).to.equal(subscriptionId);
+            return { created: (url) => expect(url).to.equal(`${PATH}/${data._id}`) };
+          };
+          run(request, reply, 'createPost', done);
+        }, done);
     });
   });
 
