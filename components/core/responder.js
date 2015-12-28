@@ -7,13 +7,13 @@ function getBody(data) {
   const isModel = data && data.constructor.name === 'model',
         isMongoError = data && data.errmsg && (data.code === 11000 || data.code === 11001),
         isError = Boolean(data && data.errors),
-        isErrorObject = data instanceof Error;
+        isErrorType = data instanceof Error;
 
   if (isMongoError) {
     return Object.assign({ isError: true }, data.toJSON());
   } else if (isError) {
     return Object.assign({ isError: true }, data);
-  } else if (isErrorObject) {
+  } else if (isErrorType) {
     return Object.assign({ isError: true }, { message: data.message });
   } else if (isModel) {
     return data.toObject();
@@ -59,7 +59,7 @@ function bulkCreatedFailure(request, reply) {
   return err => processError(reply, err);
 }
 
-function deletedFailure(request, reply) {
+function removedFailure(request, reply) {
   return err => processError(reply, err);
 }
 
@@ -102,10 +102,17 @@ module.exports = {
   replacedFailure,
   updatedSuccess: readSuccess,
   updatedFailure: replacedFailure,
-  deletedSuccess: readSuccess,
-  deletedFailure,
+  removedSuccess: readSuccess,
+  removedFailure,
   searchSuccess,
   searchFailure,
   readSuccess,
-  readFailure
+  readFailure,
+  decorate: (method, name) => {
+    return (request, reply) => {
+      return method(request, reply).then(
+        module.exports[`${name}Success`](request, reply),
+        module.exports[`${name}Failure`](request, reply));
+    };
+  }
 };

@@ -5,120 +5,65 @@ const PostModel = require('../post-model'),
       Helper = require('../../core/handlers-helper'),
       helper = new Helper(PostModel);
 
-function searchViaGet(request, reply) {
-  return helper
-    .searchViaGet(request)
-    .then(responder.searchSuccess(request, reply),
-          responder.searchFailure(request, reply));
+function searchViaGet(request) {
+  return helper.searchViaGet(request);
 }
 
-function searchViaPost(request, reply) {
-  return helper
-    .searchViaPost(request)
-    .then(responder.searchSuccess(request, reply),
-          responder.searchFailure(request, reply));
+function searchViaPost(request) {
+  return helper.searchViaPost(request);
 }
 
-function remove(id) {
-  return PostModel.findById(id).then(doc => doc ? doc.remove() : null);
+function bulkRemovePosts(request) {
+  return helper.bulkRemove(request.payload);
 }
 
-function update(data, id) {
-  return PostModel
-    .findById(data.id || id)
-    .then(doc => doc ? doc.set(data || {}).save() : null);
+function bulkUpdatePosts(request) {
+  return helper.bulkUpdate(request.payload);
 }
 
-function replace(data, id) {
-  const opts = { new: true, upsert: false, runValidators: true };
-
-  id = data.id || id;
-  data = Object.assign({ $unset: {} }, data || {});
-
-  PostModel.schema
-    .getPaths(['_id', '__v'])
-    .filter(path => !(path in data))
-    .forEach(path => data.$unset[path] = 1);
-
-  return PostModel.findOneAndUpdate({ _id: id }, data, opts);
+function bulkReplacePosts(request) {
+  return helper.bulkReplace(request.payload);
 }
 
-function create(data) {
-  return new PostModel(data || {}).save();
+function bulkCreatePosts(request) {
+  return helper.bulkCreate(request.payload);
 }
 
-function read(id) {
-  return PostModel.findById(id);
+function removePost(request) {
+  return helper.remove(request.params.id);
 }
 
-function bulkRemovePosts(request, reply) {
-  return helper
-    .bulkRemove(request.payload)
-    .then(responder.bulkRemovedSuccess(request, reply),
-          responder.bulkRemovedFailure(request, reply));
+function updatePost(request) {
+  return helper.update(request.payload, request.params.id);
 }
 
-function bulkUpdatePosts(request, reply) {
-  return helper
-    .bulkUpdate(request.payload)
-    .then(responder.bulkUpdatedSuccess(request, reply),
-          responder.bulkUpdatedFailure(request, reply));
+function replacePost(request) {
+  return helper.replace(request.payload, request.params.id);
 }
 
-function bulkReplacePosts(request, reply) {
-  return helper
-    .bulkReplace(request.payload)
-    .then(responder.bulkReplacedSuccess(request, reply),
-          responder.bulkReplacedFailure(request, reply));
+function createPost(request) {
+  return helper.create(request.payload);
 }
 
-function bulkCreatePosts(request, reply) {
-  return helper
-    .bulkCreate(request.payload)
-    .then(responder.bulkCreatedSuccess(request, reply),
-          responder.bulkCreatedFailure(request, reply));
+function readPost(request) {
+  return helper.read(request.params.id);
 }
 
-function removePost(request, reply) {
-  return remove(request.params.id)
-    .then(responder.deletedSuccess(request, reply),
-          responder.deletedFailure(request, reply));
-}
-
-function updatePost(request, reply) {
-  return update(request.payload, request.params.id)
-    .then(responder.updatedSuccess(request, reply),
-          responder.updatedFailure(request, reply));
-}
-
-function replacePost(request, reply) {
-  return replace(request.payload, request.params.id)
-    .then(responder.replacedSuccess(request, reply),
-          responder.replacedFailure(request, reply));
-}
-
-function createPost(request, reply) {
-  return create(request.payload)
-    .then(responder.createdSuccess(request, reply),
-          responder.createdFailure(request, reply));
-}
-
-function readPost(request, reply) {
-  return read(request.params.id)
-    .then(responder.readSuccess(request, reply),
-          responder.readFailure(request, reply));
-}
-
-module.exports = {
-  bulkCreatePosts,
-  bulkRemovePosts,
-  bulkReplacePosts,
-  bulkUpdatePosts,
-  createPost,
-  removePost,
-  readPost,
-  replacePost,
-  searchViaGet,
-  searchViaPost,
-  updatePost
+const methods = {
+  bulkRemovePosts: { method: bulkRemovePosts, response: 'bulkRemoved' },
+  bulkUpdatePosts: { method: bulkUpdatePosts, response: 'bulkUpdated' },
+  bulkReplacePosts: { method: bulkReplacePosts, response: 'bulkReplaced' },
+  bulkCreatePosts: { method: bulkCreatePosts, response: 'bulkCreated' },
+  removePost: { method: removePost, response: 'removed' },
+  updatePost: { method: updatePost, response: 'updated' },
+  replacePost: { method: replacePost, response: 'replaced' },
+  createPost: { method: createPost, response: 'created' },
+  readPost: { method: readPost, response: 'read' },
+  searchViaPost: { method: searchViaPost, response: 'search' },
+  searchViaGet: { method: searchViaGet, response: 'search' }
 };
+
+Object.keys(methods).forEach(name => {
+  const data = methods[name];
+  module.exports[name] = responder.decorate(data.method, data.response);
+});
