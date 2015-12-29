@@ -15,7 +15,7 @@ function makeUserPosts(subscription, posts, data, onlySubscription) {
 
   for (i = 0; i < len; i++) {
     const post = posts[i];
-    if (post.feedId.toString() !== subscription.feedId.toString()) {
+    if (post.feedId && post.feedId.toString() !== subscription.feedId.toString()) {
       throw new Error(`Post ${post.id || post._id} does not belong to subscription ${subId}`);
     }
   }

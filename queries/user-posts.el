@@ -39,6 +39,21 @@ Content-type: :content-type
     ]
 }
 
+# search by read status
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "query": {
+        "query": {
+            "term": {
+                "read": false
+            }
+        }
+    },
+    "limit": 10,
+    "fields": ["post.title", "post.author", "post.guid"]
+}
+
 # search by id
 POST :search-url
 Content-type: :content-type

@@ -42,9 +42,7 @@ let routes = [{
   path: '/user-posts/{id}',
   config: {
     handler: handlers.removePost,
-    validate: {
-      params: { id: Joi.userPostId() }
-    }
+    validate: { params: { id: Joi.userPostId() } }
   }
 }, {
   method: ['POST', 'PATCH'],

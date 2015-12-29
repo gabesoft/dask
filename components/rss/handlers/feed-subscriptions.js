@@ -11,6 +11,7 @@ const SubscriptionModel = require('../feed-subscription-model'),
       QUERY = { query: { disabled: { $ne: true } } };
 
 function addUnreadCounts(subscriptions) {
+  subscriptions = Array.isArray(subscriptions) ? subscriptions : [subscriptions];
   return searcher
     .search({
       body: {
@@ -41,7 +42,10 @@ function addUnreadCounts(subscriptions) {
 }
 
 function search(data) {
-  return helper.search(data, QUERY).then(subs => addUnreadCounts(subs));
+  return helper
+    .search(data, QUERY)
+    .then(subs => subs.map(sub => sub.toObject()))
+    .then(subs => addUnreadCounts(subs));
 }
 
 function searchViaGet(request) {
@@ -59,17 +63,17 @@ function createSubscription(request) {
 
   return SubscriptionModel
     .findOne({ userId, feedId })
-    .then(sub => sub.set('disabled', false).save() || helper.create(request.payload))
+    .then(sub => sub ? sub.set('disabled', false).save() : helper.create(request.payload))
     .then(sub => indexer.addPosts(sub.toObject(), null, { read: true }).then(() => sub));
 }
 
 function readSubscription(request) {
-  return helper.read(request.params.id).then(sub => addUnreadCounts([sub]));
+  return helper.read(request.params.id).then(sub => addUnreadCounts(sub.toObject()));
 }
 
 function removeSubscription(request) {
-  return helper
-    .remove(request.params.id)
+  return SubscriptionModel
+    .findById(request.params.id)
     .then(sub => ensureExists(sub, SubscriptionModel.modelName, request.params.id))
     .then(sub => sub.set('disabled', true).save())
     .then(sub => indexer.deletePosts(sub.get('id')).then(() => sub));
