@@ -18,26 +18,21 @@ class Helper {
   }
 
   searchViaGet(request) {
-    const data = request.query || {};
-    return this.search(data.query,
-                       data.fields,
-                       data.sort,
-                       data.skip || data.from,
-                       data.limit || data.size);
+    return this.search(request.query);
   }
 
   searchViaPost(request) {
-    const data = request.payload || {};
-    return this.search(data.query,
-                       data.fields,
-                       data.sort,
-                       data.skip || data.from,
-                       data.limit || data.size);
+    return this.search(request.payload);
   }
 
-  search(query, fields, sort, skip, limit) {
-    skip = skip || SKIP;
-    limit = limit || LIMIT;
+  search(data) {
+    data = data || {};
+
+    const query = data.query,
+          skip = data.skip || data.from || SKIP,
+          limit = data.limit || data.size || LIMIT;
+
+    let fields = data.fields, sort = data.sort;
 
     fields = Array.isArray(fields) ? fields.join(' ') : fields;
     sort = Array.isArray(sort) ? sort.join(' ') : sort;
@@ -115,4 +110,7 @@ class Helper {
   }
 }
 
-module.exports = Helper;
+module.exports = {
+  Helper,
+  ensureExists
+};

@@ -1,9 +1,12 @@
 'use strict';
 
 const handlers = require('../handlers/user-posts'),
+      helper = require('../../core/routes-helper'),
       Joi = require('../../core/joi');
 
-module.exports = [{
+// TODO: generate routes with the routes-helper
+
+let routes = [{
   method: 'GET',
   path: '/user-posts/{id}',
   config: {
@@ -50,9 +53,16 @@ module.exports = [{
   method: 'DELETE',
   path: '/bulk/user-posts/{subscriptionId}',
   config: {
-    handler: handlers.bulkDeletePosts,
+    handler: handlers.bulkRemovePosts,
     validate: {
       params: { subscriptionId: Joi.objectId() }
     }
   }
 }];
+
+routes = routes.concat(helper.makeSearchRoutes('/user-posts', {
+  searchViaGet: handlers.searchViaGet,
+  searchViaPost: handlers.searchViaPost
+}));
+
+module.exports = routes;

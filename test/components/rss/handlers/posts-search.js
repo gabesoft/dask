@@ -21,7 +21,7 @@ describe('post handlers search @mongo', () => {
       posts = data;
       ids = posts.map(post => post.get('id'));
       done();
-    });
+    }, done);
   });
 
   it('returns an array even for a single element', done => {

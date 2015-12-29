@@ -11,12 +11,12 @@
 #
 
 # variables
-:base = http://localhost:8006
+:api = http://localhost:8006
 :content-type = application/json
 
 # post creation
 # successful first then conflict error subsequent times
-POST :base/posts
+POST :api/posts
 Content-type: :content-type
 {
     "author": "Anonymous",
@@ -32,7 +32,7 @@ Content-type: :content-type
 
 # post creation - invalid
 # successful first then conflict error subsequent times
-POST :base/posts
+POST :api/posts
 Content-type: :content-type
 {
     "author": "Anonymous",
@@ -45,7 +45,7 @@ Content-type: :content-type
 }
 
 # post replace
-PUT :base/posts/5677a14921a210927374a8de
+PUT :api/posts/5677a14921a210927374a8de
 Content-type: :content-type
 {
     "author": "Anonymous",
@@ -57,7 +57,7 @@ Content-type: :content-type
 }
 
 # post update
-PATCH :base/posts/5677a14921a210927374a8de
+PATCH :api/posts/5677a14921a210927374a8de
 Content-type: :content-type
 {
     "author": "Anonymous",
@@ -72,33 +72,33 @@ Content-type: :content-type
 }
 
 # existing post read 
-GET :base/posts/5677a14921a210927374a8de
+GET :api/posts/5677a14921a210927374a8de
 
 # non existing post read 
-GET :base/posts/5674dcc9f73a74423ae68b20
+GET :api/posts/5674dcc9f73a74423ae68b20
 
 # invalid id post read 
-GET :base/posts/abcd
+GET :api/posts/abcd
 
 # no id specified
-GET :base/posts/
+GET :api/posts/
 
 # post delete
-# DELETE :base/posts/5677a14921a210927374a8de
+# DELETE :api/posts/5677a14921a210927374a8de
 
 # post bulk delete - invalid
-DELETE :base/bulk/posts
+DELETE :api/bulk/posts
 Content-type: :content-type
 [ "1", "2", "3" ]
 
 # bulk post creation - non array input
-POST :base/bulk/posts
+POST :api/bulk/posts
 Content-type: :content-type
 {}
 
 # bulk post creation
 # successful first then conflict error subsequent times
-POST :base/bulk/posts
+POST :api/bulk/posts
 Content-type: :content-type
 [{
     "author": "Anonymous",
@@ -132,7 +132,7 @@ Content-type: :content-type
 }]
 
 # search posts
-POST :base/search/posts
+POST :api/search/posts
 Content-type: :content-type
 {
   "query": { "feedId": "563aec31d9ccd0b9cf91b804" },

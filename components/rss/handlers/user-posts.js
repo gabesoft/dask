@@ -1,31 +1,12 @@
 'use strict';
 
+const LIMIT = 1000;
+
 const searcher = require('../searcher'),
       responder = require('../../core/responder'),
       indexer = require('../indexer'),
+      ensureExists = require('../../core/handlers-helper').ensureExists,
       Subscription = require('../feed-subscription-model');
-
-// TODO: implement search (add routes too)
-
-function readPost(request, reply) {
-  return searcher
-    .search({
-      body: {
-        query: { term: { _id: request.params.id } }
-      }
-    })
-    .then(results => results.hits.hits[0])
-    .then(responder.readSuccess(request, reply),
-          responder.readFailure(request, reply));
-}
-
-function ensureExists(doc, name, id) {
-  if (doc) {
-    return doc;
-  } else {
-    throw new Error(`A ${name} with id ${id} was not found`);
-  }
-}
 
 function indexPosts(subscriptionId, query, data) {
   query = query || {};
@@ -40,50 +21,75 @@ function indexPosts(subscriptionId, query, data) {
     .then(results => results.hits.hits);
 }
 
-function createPost(request, reply) {
-  const params = request.params || {},
-        data = request.payload || {};
-
-  return indexPosts(params.subscriptionId, { _id: params.postId }, data)
-    .then(results => results[0])
-    .then(responder.createdSuccess(request, reply),
-          responder.createdFailure(request, reply));
+function search(data) {
+  data = data || {};
+  return searcher
+    .search({
+      body: data.query || {},
+      _source: data.fields,
+      sort: data.sort,
+      from: data.skip || data.from || 0,
+      size: data.limit || data.size || LIMIT
+    })
+    .then(results => results.hits);
 }
 
-function updatePost(request, reply) {
-  const params = request.params || {},
-        data = request.payload || {};
-
-  return indexPosts(params.subscriptionId, { _id: params.postId }, data)
-    .then(results => results[0])
-    .then(responder.updatedSuccess(request, reply),
-          responder.updatedFailure(request, reply));
+function searchViaGet(request) {
+  return search(request.query);
 }
 
-function bulkCreatePosts(request, reply) {
+function searchViaPost(request) {
+  return search(request.payload);
+}
+
+function readPost(request) {
+  return searcher
+    .search({ body: { query: { term: { _id: request.params.id } } } })
+    .then(results => results.hits.hits[0]);
+}
+
+function createPost(request) {
+  const params = request.params || {},
+        data = request.payload || {},
+        subscriptionId = params.subscriptionId,
+        query = { _id: params.postId };
+
+  return indexPosts(subscriptionId, query, data).then(results => results[0]);
+}
+
+function updatePost(request) {
+  const params = request.params || {},
+        data = request.payload || {},
+        subscriptionId = params.subscriptionId,
+        query = { _id: params.postId };
+
+  return indexPosts(subscriptionId, query, data).then(results => results[0]);
+}
+
+function bulkCreatePosts(request) {
   const subscriptionId = request.params.subscriptionId,
         ids = request.payload.postIds || [],
         data = request.payload.data || {},
         query = ids.length > 0 ? { _id: { $in: ids } } : {};
 
-  return indexPosts(subscriptionId, query, data)
-    .then(responder.bulkCreatedSuccess(request, reply),
-          responder.bulkCreatedFailure(request, reply));
+  return indexPosts(subscriptionId, query, data);
 }
 
-function bulkDeletePosts(request, reply) {
-  const subscriptionId = request.params.subscriptionId;
-
-  return indexer
-    .deletePosts(subscriptionId)
-    .then(responder.bulkRemovedSuccess(request, reply),
-          responder.bulkRemovedFailure(request, reply));
+function bulkRemovePosts(request) {
+  return indexer.deletePosts(request.params.subscriptionId);
 }
 
-module.exports = {
-  createPost,
-  updatePost,
-  readPost,
-  bulkCreatePosts,
-  bulkDeletePosts
+const methods = {
+  createPost: { method: createPost, response: 'created' },
+  updatePost: { method: updatePost, response: 'updated' },
+  readPost: { method: readPost, response: 'read' },
+  bulkCreatePosts: { method: bulkCreatePosts, response: 'bulkCreated' },
+  bulkRemovePosts: { method: bulkRemovePosts, response: 'bulkRemoved' },
+  searchViaGet: { method: searchViaGet, response: 'search' },
+  searchViaPost: { method: searchViaPost, response: 'search' }
 };
+
+Object.keys(methods).forEach(name => {
+  const data = methods[name];
+  module.exports[name] = responder.decorate(data.method, data.response);
+});

@@ -68,7 +68,7 @@ function makeSearchRoutes(path, handlers) {
         payload: Joi.object().keys({
           query: Joi.object(),
           fields: [Joi.array().items(Joi.string()), Joi.object(), Joi.string()],
-          sort: [Joi.array().items(Joi.string()), Joi.object(), Joi.string()],
+          sort: [Joi.array().items([Joi.string(), Joi.object()]), Joi.object(), Joi.string()],
           skip: Joi.number().min(0).integer(),
           from: Joi.number().min(0).integer(),
           limit: Joi.number().min(0).integer(),

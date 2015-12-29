@@ -11,6 +11,7 @@ function makeRequest(payload, params, query, pathname) {
 }
 
 function run(request, reply, method, done) {
+  expect(handlers).to.contain.keys([method]);
   handlers[method](request, reply).then(() => done(), done);
 }
 

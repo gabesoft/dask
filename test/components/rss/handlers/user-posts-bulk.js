@@ -11,6 +11,7 @@ function makeRequest(payload, params, query, pathname) {
 }
 
 function run(request, reply, method, done) {
+  expect(handlers).to.contain.keys([method]);
   handlers[method](request, reply).then(() => done(), done);
 }
 
@@ -55,7 +56,7 @@ describe('user post handlers bulk @mongo @elastic', () => {
                 const ids = data.map(post => post._id);
                 expect(ids).to.have.same.members(results.map(post => post._id));
               };
-        run(request, reply, 'bulkDeletePosts', done);
+        run(request, reply, 'bulkRemovePosts', done);
       }, done);
     });
   });

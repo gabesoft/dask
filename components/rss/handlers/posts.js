@@ -2,7 +2,7 @@
 
 const PostModel = require('../post-model'),
       responder = require('../../core/responder'),
-      Helper = require('../../core/handlers-helper'),
+      Helper = require('../../core/handlers-helper').Helper,
       helper = new Helper(PostModel);
 
 function searchViaGet(request) {

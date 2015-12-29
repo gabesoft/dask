@@ -11,12 +11,33 @@
 #
 
 # variables
-:base = http://localhost:8006
+:api = http://localhost:8006
 :search-url = http://10.0.1.2:9200/.dev-dask-rss/post/_search?pretty
 :content-type = application/json
 
 # get by id
-GET :base/user-posts/563aec31d9ccd0b9cf91b80a-5662bdff0eb8c31981983f54
+GET :api/user-posts/563aec31d9ccd0b9cf91b80a-5662bdff0eb8c31981983f54
+
+# search via post
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "query": {
+        "query": {
+            "term": {
+                "post.title": "vim"
+            }
+        }
+    },
+    "from": 5,
+    "limit": 3,
+    "fields": ["post.title", "post.author", "post.guid"],
+    "sort": [
+        "_score",
+        "post.title:asc",
+        "post.date:desc"
+    ]
+}
 
 # search by id
 POST :search-url

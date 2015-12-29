@@ -80,7 +80,7 @@ function readFailure(request, reply) {
 }
 
 function searchSuccess(request, reply) {
-  return data => reply(data.map(getBody));
+  return data => reply(Array.isArray(data) ? data.map(getBody) : getBody(data));
 }
 
 function searchFailure(request, reply) {
