@@ -52,7 +52,6 @@ function searchViaPost(request) {
   return search(request.payload);
 }
 
-// TODO: validate that payload contains a valid userId  &&  feedId
 function createSubscription(request) {
   const data = request.payload || {},
         userId = data.userId,
