@@ -38,6 +38,15 @@ let routes = [{
     }
   }
 }, {
+  method: 'DELETE',
+  path: '/user-posts/{id}',
+  config: {
+    handler: handlers.removePost,
+    validate: {
+      params: { id: Joi.userPostId() }
+    }
+  }
+}, {
   method: ['POST', 'PATCH'],
   path: '/bulk/user-posts/{subscriptionId}',
   config: {

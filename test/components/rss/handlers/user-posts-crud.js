@@ -63,4 +63,15 @@ describe('user post handlers crud @mongo @elastic', () => {
       }, done);
     });
   });
+
+  describe('delete', () => {
+    it('returns the id of the removed post', done => {
+      factory.makeUserPostAndSave().then(post => {
+        const params = { id: post._id },
+              request = makeRequest(null, params),
+              reply = data => expect(data._id).to.equal(post._id);
+        run(request, reply, 'removePost', done);
+      });
+    });
+  });
 });

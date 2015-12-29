@@ -57,6 +57,10 @@ function createPost(request) {
   return indexPosts(subscriptionId, query, data).then(results => results[0]);
 }
 
+function removePost(request) {
+  return searcher.removeById(request.params.id);
+}
+
 function bulkCreatePosts(request) {
   const subscriptionId = request.params.subscriptionId,
         ids = request.payload.postIds || [],
@@ -72,6 +76,7 @@ function bulkRemovePosts(request) {
 
 const methods = {
   createPost: { method: createPost, response: 'created' },
+  removePost: { method: removePost, response: 'removed' },
   updatePost: { method: createPost, response: 'updated' },
   readPost: { method: readPost, response: 'read' },
   bulkCreatePosts: { method: bulkCreatePosts, response: 'bulkCreated' },

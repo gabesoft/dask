@@ -68,6 +68,15 @@ function index(posts, update) {
           .then(() => results.items.map(item => item.index || item.update)));
 }
 
+function removeById(id) {
+  return client
+    .delete({ index: indexName, type: typeName, id })
+    .then(results => client
+          .indices
+          .refresh({ index: indexName })
+          .then(() => results));
+}
+
 function remove(posts) {
   const body = posts.map(post => {
     return {
@@ -90,6 +99,7 @@ module.exports = {
   index: posts => index(posts, false),
   update: posts => index(posts, true),
   remove,
+  removeById,
   search,
   scroll,
   count
