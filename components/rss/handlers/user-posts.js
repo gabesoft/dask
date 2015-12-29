@@ -57,15 +57,6 @@ function createPost(request) {
   return indexPosts(subscriptionId, query, data).then(results => results[0]);
 }
 
-function updatePost(request) {
-  const params = request.params || {},
-        data = request.payload || {},
-        subscriptionId = params.subscriptionId,
-        query = { _id: params.postId };
-
-  return indexPosts(subscriptionId, query, data).then(results => results[0]);
-}
-
 function bulkCreatePosts(request) {
   const subscriptionId = request.params.subscriptionId,
         ids = request.payload.postIds || [],
@@ -81,7 +72,7 @@ function bulkRemovePosts(request) {
 
 const methods = {
   createPost: { method: createPost, response: 'created' },
-  updatePost: { method: updatePost, response: 'updated' },
+  updatePost: { method: createPost, response: 'updated' },
   readPost: { method: readPost, response: 'read' },
   bulkCreatePosts: { method: bulkCreatePosts, response: 'bulkCreated' },
   bulkRemovePosts: { method: bulkRemovePosts, response: 'bulkRemoved' },

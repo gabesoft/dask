@@ -1,6 +1,6 @@
 'use strict';
 
-const handlers = require('../handlers/posts'),
+const handlers = require('../handlers/feeds'),
       helper = require('../../core/routes-helper');
 
 let routes = [];
@@ -14,7 +14,8 @@ routes = routes.concat(helper.makeCrudRoutes('/feeds', {
 }));
 
 routes = routes.concat(helper.makeSearchRoutes('/feeds', {
-  search: handlers.searchFeeds
+  searchViaGet: handlers.searchViaGet,
+  searchViaPost: handlers.searchViaPost
 }));
 
 routes = routes.concat(helper.makeBulkRoutes('/feeds', {

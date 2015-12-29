@@ -17,18 +17,19 @@ class Helper {
     this.Model = Model;
   }
 
-  searchViaGet(request) {
-    return this.search(request.query);
+  searchViaGet(request, defaults) {
+    return this.search(request.query, defaults);
   }
 
-  searchViaPost(request) {
-    return this.search(request.payload);
+  searchViaPost(request, defaults) {
+    return this.search(request.payload, defaults);
   }
 
-  search(data) {
+  search(data, defaults) {
     data = data || {};
+    defaults = defaults || {};
 
-    const query = data.query,
+    const query = Object.assign(defaults.query || {}, data.query),
           skip = data.skip || data.from || SKIP,
           limit = data.limit || data.size || LIMIT;
 

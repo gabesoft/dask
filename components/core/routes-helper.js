@@ -5,51 +5,42 @@
 const MAX_BYTES = 104857600,
       Joi = require('./joi');
 
-function makeCrudRoutes(path, handlers) {
+function makeCrudRoutes(path, handlers, validate) {
+  validate = validate || {};
   return [{
     method: 'GET',
     path: `${path}/{id}`,
     config: {
       handler: handlers.read,
-      validate: {
-        params: { id: Joi.objectId() }
-      }
+      validate: Object.assign({ params: { id: Joi.objectId() } }, validate.read || {})
     }
   }, {
     method: 'POST',
     path: `${path}`,
     config: {
       handler: handlers.create,
-      validate: {
-        payload: Joi.object()
-      }
+      validate: Object.assign({ payload: Joi.object() }, validate.create || {})
     }
   }, {
     method: 'PUT',
     path: `${path}/{id}`,
     config: {
       handler: handlers.replace,
-      validate: {
-        params: { id: Joi.objectId() }
-      }
+      validate: Object.assign({ params: { id: Joi.objectId() } }, validate.replace || {})
     }
   }, {
     method: 'PATCH',
     path: `${path}/{id}`,
     config: {
       handler: handlers.update,
-      validate: {
-        params: { id: Joi.objectId() }
-      }
+      validate: Object.assign({ params: { id: Joi.objectId() } }, validate.update || {})
     }
   }, {
     method: 'DELETE',
     path: `${path}/{id}`,
     config: {
       handler: handlers.remove,
-      validate: {
-        params: { id: Joi.objectId() }
-      }
+      validate: Object.assign({ params: { id: Joi.objectId() } }, validate.remove || {})
     }
   }];
 }

@@ -2,128 +2,68 @@
 
 const FeedModel = require('../feed-model'),
       responder = require('../../core/responder'),
-      Promise = require('bluebird').Promise,
-      capitalize = require('lodash').capitalize;
+      Helper = require('../../core/handlers-helper').Helper,
+      helper = new Helper(FeedModel);
 
-function searchFeeds(request, reply) {
-  const rquery = request.query || {},
-        payload = request.payload || {},
-        query = rquery.query || payload.query || {},
-        skip = (rquery.skip || rquery.from) || (payload.skip || payload.from) || 0,
-        limit = (rquery.limit || rquery.size) || (payload.limit || payload.size) || 10000,
-        sort = payload.sort,
-        fields = rquery.fields || (Array.isArray(payload.fields) ? payload.fields.join(' ') : payload.fields);
-
-  return FeedModel
-    .find(query, fields)
-    .skip(skip)
-    .limit(limit)
-    .sort(sort)
-    .exec()
-    .then(responder.searchSuccess(request, reply),
-          responder.searchFailure(request, reply));
+function searchViaGet(request) {
+  return helper.searchViaGet(request);
 }
 
-function remove(id) {
-  return FeedModel.findById(id).then(doc => doc ? doc.remove() : null);
+function searchViaPost(request) {
+  return helper.searchViaPost(request);
 }
 
-function update(data, id) {
-  return FeedModel
-    .findById(data.id || id)
-    .then(doc => doc ? doc.set(data || {}).save() : null);
+function bulkRemoveFeeds(request) {
+  return helper.bulkRemove(request.payload);
 }
 
-function replace(data, id) {
-  const opts = { new: true, upsert: false, runValidators: true };
-
-  id = data.id || id;
-  data = Object.assign({ $unset: {} }, data || {});
-
-  FeedModel.schema
-    .getPaths(['_id', '__v'])
-    .filter(path => !(path in data))
-    .forEach(path => data.$unset[path] = 1);
-
-  return FeedModel.findOneAndUpdate({ _id: id }, data, opts);
+function bulkUpdateFeeds(request) {
+  return helper.bulkUpdate(request.payload);
 }
 
-function create(data) {
-  return new FeedModel(data || {}).save();
+function bulkReplaceFeeds(request) {
+  return helper.bulkReplace(request.payload);
 }
 
-function read(id) {
-  return FeedModel.findById(id);
+function bulkCreateFeeds(request) {
+  return helper.bulkCreate(request.payload);
 }
 
-function bulk(request, reply, op) {
-  const method = `bulk${capitalize(op.name)}d`,
-        promises = (request.payload || [])
-          .map(op)
-          .map(promise => Promise.resolve(promise).reflect());
-
-  return Promise
-    .all(promises)
-    .map(promise => promise.isFulfilled() ? promise.value() : promise.reason())
-    .then(responder[`${method}Success`](request, reply),
-          responder[`${method}Failure`](request, reply));
+function removeFeed(request) {
+  return helper.remove(request.params.id);
 }
 
-function bulkRemoveFeeds(request, reply) {
-  return bulk(request, reply, remove);
+function updateFeed(request) {
+  return helper.update(request.payload, request.params.id);
 }
 
-function bulkUpdateFeeds(request, reply) {
-  return bulk(request, reply, update);
+function replaceFeed(request) {
+  return helper.replace(request.payload, request.params.id);
 }
 
-function bulkReplaceFeeds(request, reply) {
-  return bulk(request, reply, replace);
+function createFeed(request) {
+  return helper.create(request.payload);
 }
 
-function bulkCreateFeeds(request, reply) {
-  return bulk(request, reply, create);
+function readFeed(request) {
+  return helper.read(request.params.id);
 }
 
-function deleteFeed(request, reply) {
-  return remove(request.params.id)
-    .then(responder.deletedSuccess(request, reply),
-          responder.deletedFailure(request, reply));
-}
-
-function updateFeed(request, reply) {
-  return update(request.payload, request.params.id)
-    .then(responder.updatedSuccess(request, reply),
-          responder.updatedFailure(request, reply));
-}
-
-function replaceFeed(request, reply) {
-  return replace(request.payload, request.params.id)
-    .then(responder.replacedSuccess(request, reply),
-          responder.replacedFailure(request, reply));
-}
-
-function createFeed(request, reply) {
-  return create(request.payload)
-    .then(responder.createdSuccess(request, reply),
-          responder.createdFailure(request, reply));
-}
-
-function readFeed(request, reply) {
-  return read(request.params.id)
-    .then(responder.readSuccess(request, reply),
-          responder.readFailure(request, reply));
-}
-
-module.exports = {
-  bulkCreateFeeds,
-  bulkRemoveFeeds,
-  bulkReplaceFeeds,
-  bulkUpdateFeeds,
-  createFeed,
-  deleteFeed,
-  readFeed,
-  replaceFeed,
-  searchFeeds,
-  updateFeed
+const methods = {
+  bulkRemoveFeeds: { method: bulkRemoveFeeds, response: 'bulkRemoved' },
+  bulkUpdateFeeds: { method: bulkUpdateFeeds, response: 'bulkUpdated' },
+  bulkReplaceFeeds: { method: bulkReplaceFeeds, response: 'bulkReplaced' },
+  bulkCreateFeeds: { method: bulkCreateFeeds, response: 'bulkCreated' },
+  removeFeed: { method: removeFeed, response: 'removed' },
+  updateFeed: { method: updateFeed, response: 'updated' },
+  replaceFeed: { method: replaceFeed, response: 'replaced' },
+  createFeed: { method: createFeed, response: 'created' },
+  readFeed: { method: readFeed, response: 'read' },
+  searchViaPost: { method: searchViaPost, response: 'search' },
+  searchViaGet: { method: searchViaGet, response: 'search' }
 };
+
+Object.keys(methods).forEach(name => {
+  const data = methods[name];
+  module.exports[name] = responder.decorate(data.method, data.response);
+});

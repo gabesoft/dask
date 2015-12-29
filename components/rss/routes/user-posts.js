@@ -4,8 +4,6 @@ const handlers = require('../handlers/user-posts'),
       helper = require('../../core/routes-helper'),
       Joi = require('../../core/joi');
 
-// TODO: generate routes with the routes-helper
-
 let routes = [{
   method: 'GET',
   path: '/user-posts/{id}',
@@ -32,11 +30,11 @@ let routes = [{
   config: {
     handler: handlers.updatePost,
     validate: {
+      payload: Joi.object(),
       params: {
         subscriptionId: Joi.objectId(),
         postId: Joi.objectId()
-      },
-      payload: Joi.object()
+      }
     }
   }
 }, {
