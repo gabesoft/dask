@@ -1,6 +1,7 @@
 'use strict';
 
 const FeedModel = require('../feed-model'),
+      PostModel = require('../post-model'),
       responder = require('../../core/responder'),
       Helper = require('../../core/handlers-helper').Helper,
       helper = new Helper(FeedModel);
@@ -30,7 +31,9 @@ function bulkCreateFeeds(request) {
 }
 
 function removeFeed(request) {
-  return helper.remove(request.params.id);
+  return PostModel
+    .remove({ feedId: request.params.id })
+    .then(() => helper.remove(request.params.id));
 }
 
 function updateFeed(request) {
