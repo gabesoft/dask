@@ -2,13 +2,14 @@
 
 const SKIP = 0,
       LIMIT = 10000,
+      NotFoundError = require('./errors/record-not-found'),
       Promise = require('bluebird').Promise;
 
 function ensureExists(doc, name, id) {
   if (doc) {
     return doc;
   } else {
-    throw new Error(`A ${name} with id ${id} was not found`);
+    throw new NotFoundError(null, id, `A ${name} with id ${id} was not found`);
   }
 }
 
@@ -29,7 +30,7 @@ class Helper {
     data = data || {};
     defaults = defaults || {};
 
-    const query = Object.assign(defaults.query || {}, data.query),
+    const query = Object.assign({}, defaults.query || {}, data.query),
           skip = data.skip || data.from || SKIP,
           limit = data.limit || data.size || LIMIT;
 

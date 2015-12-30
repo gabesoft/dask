@@ -21,3 +21,6 @@ Content-type: :content-type
     "query": { "userId": "5653f4c91eb8188e320236b3" },
     "fields": "id"
 }
+
+# delete a subscription
+DELETE :api/feed-subscriptions/5672dd1aa2f0405eb1a223f3

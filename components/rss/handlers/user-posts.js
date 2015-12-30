@@ -63,9 +63,9 @@ function removePost(request) {
 
 function bulkCreatePosts(request) {
   const subscriptionId = request.params.subscriptionId,
-        ids = request.payload.postIds || [],
+        ids = request.payload.postIds,
         data = request.payload.data || {},
-        query = ids.length > 0 ? { _id: { $in: ids } } : {};
+        query = Array.isArray(ids) ? { _id: { $in: ids || [] } } : {};
 
   return indexPosts(subscriptionId, query, data);
 }

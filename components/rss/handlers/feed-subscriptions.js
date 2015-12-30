@@ -12,15 +12,17 @@ const SubscriptionModel = require('../feed-subscription-model'),
 
 function addUnreadCounts(subscriptions) {
   subscriptions = Array.isArray(subscriptions) ? subscriptions : [subscriptions];
+
+  const feedIds = subscriptions.map(sub => sub.feedId).filter(Boolean);
+
   return searcher
     .search({
       body: {
         size: 0,
         query: {
-          term: { read: false }
-        },
-        filter: {
-          or: subscriptions.map(sub => ({ term: { subscriptionId: sub.id } }))
+          bool: {
+            must: [{ term: { read: false } }, { terms: { feedId: feedIds } }]
+          }
         },
         aggs: {
           countsPerFeed: {

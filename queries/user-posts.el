@@ -151,8 +151,19 @@ Content-type: :content-type
 {
     "size": 0,
     "query": {
-        "term": {
-            "read": false
+        "bool": {
+            "must": [
+                {
+                    "term": {
+                        "read": false
+                    }
+                },
+                {
+                    "terms": {
+                        "feedId": [ ]
+                    }
+                }
+            ]
         }
     },
     "aggs": {
