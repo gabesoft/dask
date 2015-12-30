@@ -23,3 +23,6 @@ Content-type: :content-type
         "uri": "http:\/\/gitkitty.com\/feed.xml"
     }
 }
+
+# delete feed
+DELETE :api/feeds/563aec53d9ccd0b9cf91dc4a

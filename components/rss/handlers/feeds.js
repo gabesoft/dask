@@ -2,9 +2,20 @@
 
 const FeedModel = require('../feed-model'),
       PostModel = require('../post-model'),
+      SubscriptionModel = require('../feed-subscription-model'),
+      NotExpectedError = require('../../core/errors/record-not-expected'),
       responder = require('../../core/responder'),
       Helper = require('../../core/handlers-helper').Helper,
       helper = new Helper(FeedModel);
+
+function ensureNotExists(docs, name, id) {
+  const msg = `A ${name} was not expected to exist for feed ${id}`;
+  if (Array.isArray(docs) && docs.length > 0) {
+    throw new NotExpectedError(name, id, msg);
+  } else if (docs) {
+    throw new NotExpectedError(name, id, msg);
+  }
+}
 
 function searchViaGet(request) {
   return helper.searchViaGet(request);
@@ -31,9 +42,12 @@ function bulkCreateFeeds(request) {
 }
 
 function removeFeed(request) {
-  return PostModel
-    .remove({ feedId: request.params.id })
-    .then(() => helper.remove(request.params.id));
+  const id = request.params.id;
+  return SubscriptionModel
+    .find({ feedId: id })
+    .then(subs => ensureNotExists(subs, SubscriptionModel.modelName, id))
+    .then(() => PostModel.remove({ feedId: id }))
+    .then(() => helper.remove(id));
 }
 
 function updateFeed(request) {

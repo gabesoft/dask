@@ -18,7 +18,35 @@
 # get by id
 GET :api/user-posts/563aec31d9ccd0b9cf91b80a-5662bdff0eb8c31981983f54
 
-# search via post
+# search via post 1
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "query": {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "userId": "5653f4c91eb8188e320236b3"
+                        }
+                    },
+                    {
+                        "term": {
+                            "feedId": "5647fee0d50a855e89186651"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "limit": "5",
+    "sort": [
+        "post.date:desc"
+    ]
+}
+
+# search via post 2
 POST :api/search/user-posts
 Content-type: :content-type
 {
@@ -31,7 +59,6 @@ Content-type: :content-type
     },
     "from": 5,
     "limit": 3,
-    "fields": ["post.title", "post.author", "post.guid"],
     "sort": [
         "_score",
         "post.title:asc",
