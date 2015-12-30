@@ -20,6 +20,11 @@ routes = routes.concat(helper.makeCrudRoutes('/feed-subscriptions', {
       tags: Joi.array().items(Joi.string()),
       title: Joi.string()
     }).requiredKeys('userId', 'feedId')
+  },
+  remove: {
+    query: {
+      soft: Joi.boolean()
+    }
   }
 }));
 

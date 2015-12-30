@@ -12,7 +12,7 @@ function ensureNotExists(docs, name, id) {
   const msg = `A ${name} was not expected to exist for feed ${id}`;
   if (Array.isArray(docs) && docs.length > 0) {
     throw new NotExpectedError(name, id, msg);
-  } else if (docs) {
+  } else if (docs && !Array.isArray(docs)) {
     throw new NotExpectedError(name, id, msg);
   }
 }

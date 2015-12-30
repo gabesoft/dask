@@ -73,12 +73,24 @@ function readSubscription(request) {
   return helper.read(request.params.id).then(sub => addUnreadCounts(sub.toObject()));
 }
 
-function removeSubscription(request) {
+function disableSubscription(request) {
   return SubscriptionModel
     .findById(request.params.id)
     .then(sub => ensureExists(sub, SubscriptionModel.modelName, request.params.id))
     .then(sub => sub.set('disabled', true).save())
     .then(sub => indexer.deletePosts(sub.get('id')).then(() => sub));
+}
+
+function deleteSubscription(request) {
+  return helper
+    .remove(request.params.id)
+    .then(sub => indexer.deletePosts(sub.get('id')).then(() => sub));
+}
+
+function removeSubscription(request) {
+  return (request.query || {}).soft
+    ? disableSubscription(request)
+    : deleteSubscription(request);
 }
 
 function updateSubscription(request) {
