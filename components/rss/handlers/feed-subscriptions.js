@@ -67,7 +67,7 @@ function createSubscription(request) {
   return SubscriptionModel
     .findOne({ userId, feedId })
     .then(sub => {
-      const title = data.title || sub.get('title');
+      const title = data.title || (sub ? sub.get('title') : null);
       if (title) {
         return sub;
       } else {
