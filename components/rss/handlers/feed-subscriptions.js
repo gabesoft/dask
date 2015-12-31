@@ -1,6 +1,7 @@
 'use strict';
 
 const SubscriptionModel = require('../feed-subscription-model'),
+      FeedModel = require('../feed-model'),
       trans = require('trans'),
       indexer = require('../indexer'),
       searcher = require('../searcher'),
@@ -59,14 +60,27 @@ function searchViaPost(request) {
 }
 
 function createSubscription(request) {
-  const data = request.payload || {},
+  const data = Object.assign({ disabled: false }, request.payload || {}),
         userId = data.userId,
         feedId = data.feedId;
 
   return SubscriptionModel
     .findOne({ userId, feedId })
-    .then(sub => sub ? sub.set('disabled', false).save() : helper.create(request.payload))
-    .then(sub => indexer.addPosts(sub.toObject(), null, { read: true }).then(() => sub));
+    .then(sub => {
+      const title = data.title || sub.get('title');
+      if (title) {
+        return sub;
+      } else {
+        return FeedModel.findById(feedId)
+          .then(feed => ensureExists(feed, FeedModel.modelName, feedId))
+          .then(feed => data.title = feed.get('title'))
+          .then(() => sub);
+      }
+    })
+    .then(sub => sub ? sub.set(data).save() : helper.create(request.payload))
+    .then(sub => indexer
+          .addPosts(sub.toObject(), null, { read: true })
+          .then(() => sub));
 }
 
 function readSubscription(request) {
