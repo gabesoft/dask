@@ -77,7 +77,7 @@ function createSubscription(request) {
           .then(() => sub);
       }
     })
-    .then(sub => sub ? sub.set(data).save() : helper.create(request.payload))
+    .then(sub => sub ? sub.set(data).save() : helper.create(data))
     .then(sub => indexer
           .addPosts(sub.toObject(), null, { read: true })
           .then(() => sub));
