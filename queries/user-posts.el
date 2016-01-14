@@ -142,6 +142,19 @@ Content-type: :content-type
     }
 }
 
+# multiple term search
+POST :search-url
+Content-type: :content-type
+{
+    "filter": {
+        "bool": {
+            "must": {
+                "term": { "tags": "css" }
+            }
+        }
+    }
+}
+
 #
 POST :search-url
 Content-type: :content-type

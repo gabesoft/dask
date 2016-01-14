@@ -29,11 +29,13 @@ start-mongo-test:
 stop-mongo-test:
 	@mongo --port $(MONGO_TEST_PORT) admin --eval 'db.shutdownServer();'
 
+run-test-mongo: export NODE_ENV=test
 run-test-mongo:
-	-@NODE_ENV=test $(MOCHA) --grep @mongo $(TESTS) ./test/support/mongo-hooks.js --timeout 5000
+	-@$(MOCHA) --grep @mongo $(TESTS) ./test/support/mongo-hooks.js --timeout 5000
 
+run-test-simple: export NODE_ENV=test
 run-test-simple:
-	-@NODE_ENV=test $(MOCHA) --grep @simple $(TESTS)
+	-@$(MOCHA) --grep @simple $(TESTS)
 
 test-mongo: start-mongo-test run-test-mongo stop-mongo-test
 test-simple: run-test-simple

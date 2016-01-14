@@ -24,5 +24,28 @@ Content-type: :content-type
     }
 }
 
+# get feeds by id
+POST :api/search/feeds
+Content-type: :content-type
+{
+    "query": {
+        "_id": {
+            "$in": [
+                "563aec31d9ccd0b9cf91b80f",
+                "563aec32d9ccd0b9cf91b8d6",
+                "563aec32d9ccd0b9cf91b8eb",
+                "563aec33d9ccd0b9cf91b9dc",
+                "563aec33d9ccd0b9cf91b9f5",
+                "563aec33d9ccd0b9cf91ba06",
+                "563aec34d9ccd0b9cf91bad8",
+                "563aec34d9ccd0b9cf91baed",
+                "563aec3fd9ccd0b9cf91c752"
+            ]
+        }
+    },
+    "fields": "title"
+}
+
+
 # delete feed
 DELETE :api/feeds/563aec53d9ccd0b9cf91dc4a
