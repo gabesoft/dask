@@ -66,6 +66,64 @@ Content-type: :content-type
     ]
 }
 
+# search via post 3
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "sort": [
+        "post.date:desc"
+    ],
+    "from": 0,
+    "limit": 50,
+    "query": {
+        "query": {
+            "bool": {
+                "must": {
+                    "term": {
+                        "userId": "5653f4c91eb8188e320236b3"
+                    }
+                }
+            }
+        }
+    }
+}
+
+# search via post 4
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "sort": [
+        "post.date:desc"
+    ],
+    "skip": 0,
+    "limit": 50,
+    "query": {
+        "query": {
+            "bool": {
+                "must": [
+                    {
+                        "term": {
+                            "userId": "5653f4c91eb8188e320236b3"
+                        }
+                    },
+                    {
+                        "bool": {
+                            "should": [
+                                {
+                                    "term": {
+                                        "feedId": "5689b39df4a00228071abed6"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
+
+
 # search by read status
 POST :api/search/user-posts
 Content-type: :content-type
@@ -142,7 +200,7 @@ Content-type: :content-type
     }
 }
 
-# multiple term search
+# multiple term search 1
 POST :search-url
 Content-type: :content-type
 {
@@ -151,6 +209,46 @@ Content-type: :content-type
             "must": {
                 "term": { "tags": "css" }
             }
+        }
+    }
+}
+
+# multiple term search 3
+POST :search-url
+Content-type: :content-type
+{
+    "filter": {
+        "bool": {
+            "must": [
+                {
+                    "bool": { 
+                        "should": [
+                            { "term": { "post.title": "design" } },
+                            { "term": { "post.description": "design" } }
+                        ]
+                     }
+                },
+                {
+                    "bool": {
+                        "must": [
+                            {
+                                "bool": {
+                                    "should": [
+                                        { "term": { "tags": "css" } }
+                                    ]
+                                }
+                            },
+                            {
+                                "bool": {
+                                    "should": [
+                                        { "term": { "read": false } }
+                                    ]
+                                }
+                            }
+                        ]
+                    }
+                }
+            ]
         }
     }
 }
