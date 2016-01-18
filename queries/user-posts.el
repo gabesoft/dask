@@ -88,7 +88,76 @@ Content-type: :content-type
     }
 }
 
-# search via post 4
+# search post by feedId
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "query": {
+        "query": {
+            "term": {
+                "feedId": "563aec38d9ccd0b9cf91c082"
+            }
+        }
+    },
+    "limit": 5
+}
+
+# search post by tags
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "query": {
+        "query": {
+            "match": {
+                "tags": "self-improvement"
+            }
+        }
+    },
+    "limit": 5
+}
+
+# search via post 5 (TODO: try this)
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "limit": 5,
+    "query": {
+        "query": {
+            "bool": {
+                "should": [
+                    {
+                        "bool": {
+                            "must": [
+                                {
+                                    "term": {
+                                        "read": false
+                                    }
+                                },
+                                {
+                                    "term": {
+                                        "tags": "css"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        "match": {
+                            "post.title": "breaking news"
+                        }
+                    },
+                    {
+                        "match": {
+                            "post.description": "breaking news"
+                        }
+                    }
+                ]
+            }
+        }
+    }
+}
+
+# search via post 6
 POST :api/search/user-posts
 Content-type: :content-type
 {
