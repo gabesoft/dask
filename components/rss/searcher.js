@@ -2,8 +2,7 @@
 
 const client = require('../../elasticsearch'),
       conf = require('../../config/store'),
-      base = conf.get('elasticsearch:base-index'),
-      indexName = `${base}-rss`,
+      indexName = conf.get('elasticsearch:index'),
       typeName = 'post';
 
 function getPostId(data) {
@@ -33,6 +32,10 @@ function scrollUntilDone(acc, promise) {
   });
 }
 
+function count(params) {
+  return client.count({ index: indexName, type: typeName, body: params });
+}
+
 function scroll(params) {
   const opts = Object.assign({
     index: indexName,
@@ -41,10 +44,6 @@ function scroll(params) {
     scroll: '30s'
   }, params);
   return scrollUntilDone([], client.search(opts));
-}
-
-function count(params) {
-  return client.count({ index: indexName, type: typeName, body: params });
 }
 
 function index(posts, update) {

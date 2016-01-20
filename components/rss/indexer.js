@@ -26,7 +26,14 @@ function makeUserPosts(subscription, posts, data, onlySubscription) {
       postId: post.id || post._id,
       subscriptionId: subscription.id || subscription._id
     }, subscription, data))
-    .remove('id', '_id', 'enabled', 'disabled', 'post.id', 'post._id', 'post.pubdate', 'post.feedId')
+    .remove('id',
+            '_id',
+            'enabled',
+            'disabled',
+            'post.id',
+            'post._id',
+            'post.pubdate',
+            'post.feedId')
     .value();
 }
 

@@ -13,6 +13,7 @@
 # variables
 :api = http://localhost:8006
 :search-url = http://10.0.1.2:9200/.dev-dask-rss/post/_search?pretty
+:search-url-new = http://10.0.1.2:9200/.dev-dask-rss-v2/post/_search?pretty
 :content-type = application/json
 
 # get by id
@@ -386,3 +387,10 @@ Content-type: :content-type
 # count of all posts
 GET :search-url&search_type=count&q=*
 
+# match all
+POST :search-url
+Content-type: :content-type
+{
+  "query": { "match_all": {} },
+  "size": 2
+}

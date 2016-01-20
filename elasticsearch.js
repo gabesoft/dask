@@ -12,4 +12,3 @@ const conf = require('./config/store'),
 process.on('exit', () => client.close());
 
 module.exports = client;
-

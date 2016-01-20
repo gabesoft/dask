@@ -13,7 +13,7 @@
     "elasticsearch": {
         "host": "10.0.1.2",
         "port": 9200,
-        "base-index": ".dev-dask",
+        "index": ".dev-dask-rss",
         "log-level": ["error"],
         "api-version": "2.1"
     }
