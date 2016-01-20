@@ -78,7 +78,9 @@ class Indexer {
 
   more(count, promise) {
     return promise.then(res => {
-      if (res.hits.hits.length === 0) {
+      const total = res.hits.total;
+
+      if (res.hits.hits.length === 0 && count < total) {
         return this.more(count, this.client.scroll({
           scrollId: res._scroll_id, scroll: this.timeout
         }));
@@ -87,7 +89,6 @@ class Indexer {
       return this
         .index(res.hits.hits)
         .then(() => {
-          const total = res.hits.total;
           if (count === total) {
             log.info(`indexed ${chalk.blue(count)} records`);
             return count;
