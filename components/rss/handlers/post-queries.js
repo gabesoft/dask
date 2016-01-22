@@ -9,7 +9,7 @@ const Model = require('../post-query-model'),
 function parseData(doc) {
   if (util.isArray(doc)) {
     return doc.map(parseData);
-  } else {
+  } else if (doc) {
     return doc.set('data', JSON.parse(doc.get('dataJSON')));
   }
 }
