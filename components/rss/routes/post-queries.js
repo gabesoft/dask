@@ -5,15 +5,16 @@ const handlers = require('../handlers/post-queries'),
       helper = require('../../core/routes-helper');
 
 let routes = [];
-const schema = {
-  _id: Joi.string(),
+const schema = Joi.object().keys({
+  _id: Joi.string().optional(),
+  id: Joi.string().optional(),
   userId: Joi.string(),
-  title: Joi.string(),
+  title: Joi.string().allow('').optional(),
   ast: Joi.any(),
   data: Joi.object(),
   text: Joi.string(),
   pin: Joi.number()
-};
+});
 
 routes = routes.concat(helper.makeCrudRoutes('/post-queries', {
   create: handlers.createQuery,
@@ -25,7 +26,7 @@ routes = routes.concat(helper.makeCrudRoutes('/post-queries', {
   create: { payload: schema },
   read: { params: { id: Joi.string() } },
   remove: { params: { id: Joi.string() } },
-  replace: { params: { id: Joi.string() } },
+  replace: { params: { id: Joi.string() }, payload: schema },
   update: { params: { id: Joi.string() }, payload: schema }
 }));
 
