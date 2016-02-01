@@ -11,9 +11,10 @@
 #
 
 # variables
-:api = http://localhost:8006
+:api = http://127.0.0.1:8006
 :search-url-old = http://10.0.1.2:9200/.dev-dask-rss/post/_search?pretty
 :search-url = http://10.0.1.2:9200/.dev-dask-rss-v2/post/_search?pretty
+:search-url-local = http://localhost:9200/.dev-dask-rss-v2/post/_search?pretty
 :content-type = application/json
 
 # get by id
@@ -45,6 +46,59 @@ Content-type: :content-type
     "sort": [
         "post.date:desc"
     ]
+}
+
+# search with not
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "query": {
+        "query": {
+            "bool": {
+                    "must_not": {
+                        "bool": {
+                            "should": [
+                                {
+                                    "match": {
+                                        "post.title": "tab"
+                                    }
+                                },
+                                {
+                                    "match": {
+                                        "post.description": "tab"
+                                    }
+                                }
+                            ]
+                        }
+                }
+            }
+        }
+    },
+    "limit": 5
+}
+
+# search with not 2
+POST :api/search/user-posts
+Content-type: :content-type
+{
+    "query": {
+        "query": {
+            "bool": {
+                "must_not": {
+                    "bool": {
+                        "should": [
+                            {
+                                "term": {
+                                    "feedId": "566e6f0e1b4abb53b9e1e9b8"
+                                }
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "limit": 3
 }
 
 # search via post 2
