@@ -15,6 +15,7 @@ const PostQuery = schema.create({
   data: { type: Object },
   dataJSON: { type: String, required: true },
   text: { type: String, required: true },
+  userText: { type: String },
   pin: { type: Number, required: true, default: 0 }
 }, null, true);
 
