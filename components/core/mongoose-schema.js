@@ -31,15 +31,8 @@ module.exports.create = (fields, options, addTimestamp) => {
 
   if ('tags' in fields) {
     schema.pre('save', function preModelSave(next) {
-      const tags = this.get('tags') || [],
-            uniq = {};
-
-      tags.forEach(tag => {
-        uniq[tag.toLowerCase()] = tag;
-      });
-
-      this.set('tags', Object.keys(uniq).sort());
-
+      const tags = new Set(this.get('tags'));
+      this.set('tags', Array.from(tags));
       next();
     });
   }
