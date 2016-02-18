@@ -441,6 +441,9 @@ Content-type: :content-type
 # count of all posts
 GET :search-url&search_type=count&q=*
 
+# delete by subscription
+DELETE :api/bulk/user-posts/56ba1be776eaa8f5eea8a569
+
 # match all
 POST :search-url
 Content-type: :content-type

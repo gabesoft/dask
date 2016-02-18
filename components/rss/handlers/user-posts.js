@@ -16,7 +16,8 @@ function indexPosts(subscriptionId, query, data) {
     .then(sub => ensureExists(sub, 'subscription', subscriptionId))
     .then(sub => indexer.addPosts(sub, Object.assign({ feedId: sub.feedId }, query), data))
     .then(results => searcher.search({
-      body: { query: { terms: { _id: results.map(result => result._id) } } }
+      body: { query: { terms: { _id: results.map(result => result._id) } } },
+      size: results.length
     }))
     .then(results => results.hits.hits);
 }
