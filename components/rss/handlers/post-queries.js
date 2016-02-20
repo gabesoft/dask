@@ -53,11 +53,15 @@ function removeQuery(request) {
 }
 
 function updateQuery(request) {
-  return helper.update(stringifyData(request.payload), request.params.id);
+  return helper
+    .update(stringifyData(request.payload), request.params.id)
+    .then(parseData);
 }
 
 function replaceQuery(request) {
-  return helper.replace(stringifyData(request.payload), request.params.id);
+  return helper
+    .replace(stringifyData(request.payload), request.params.id)
+    .then(parseData);
 }
 
 function createQuery(request) {

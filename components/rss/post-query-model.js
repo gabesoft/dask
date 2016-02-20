@@ -16,7 +16,8 @@ const PostQuery = schema.create({
   dataJSON: { type: String, required: true },
   text: { type: String, required: true },
   userText: { type: String },
-  pin: { type: Number, required: true, default: 0 }
+  pin: { type: Number, required: true, default: 0 },
+  lastUsed: { type: Date }
 }, null, true);
 
 PostQuery.index({ userId: 1, text: 1 }, { unique: true });

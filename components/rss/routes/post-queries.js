@@ -13,7 +13,9 @@ const schema = Joi.object().keys({
   ast: Joi.any(),
   data: Joi.object(),
   text: Joi.string(),
-  pin: Joi.number()
+  userText: Joi.string().allow('').optional(),
+  pin: Joi.number(),
+  lastUsed: Joi.date().optional()
 });
 
 routes = routes.concat(helper.makeCrudRoutes('/post-queries', {
