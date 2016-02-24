@@ -84,7 +84,9 @@ function createSubscription(request) {
 }
 
 function readSubscription(request) {
-  return helper.read(request.params.id).then(sub => addUnreadCounts(sub.toObject()));
+  return helper
+    .read(request.params.id)
+    .then(sub => addUnreadCounts(sub.toObject()));
 }
 
 function disableSubscription(request) {
@@ -110,7 +112,9 @@ function removeSubscription(request) {
 function updateSubscription(request) {
   return helper
     .update(request.payload, request.params.id)
-    .then(sub => indexer.updateSubscription(sub.toObject()).then(() => sub));
+    .then(sub => indexer
+          .updateSubscription(sub.toObject())
+          .then(addUnreadCounts));
 }
 
 function replaceSubscription(request) {
