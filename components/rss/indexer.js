@@ -9,23 +9,25 @@ function makeUserPosts(subscription, posts, data, onlySubscription) {
   posts = posts || [];
 
   const len = posts.length,
-        subId = subscription.id || subscription._id;
+        strId = obj => (obj.id || obj._id).toString(),
+        subscriptionId = strId(subscription);
 
   let i = 0;
 
   for (i = 0; i < len; i++) {
     const post = posts[i];
+    const postId = strId(post);
     if (post.feedId && post.feedId.toString() !== subscription.feedId.toString()) {
-      throw new Error(`Post ${post.id || post._id} does not belong to subscription ${subId}`);
+      throw new Error(`Post ${postId} does not belong to subscription ${subscriptionId}`);
     }
   }
 
   return trans(posts)
     .map('.', post => Object.assign({
       post: onlySubscription ? undefined : post,
-      postId: post.id || post._id,
-      subscriptionId: subscription.id || subscription._id
-    }, subscription, data))
+      postId: strId(post),
+      subscriptionId
+    }, subscription, data[strId(post)] || data))
     .remove('id',
             '_id',
             'enabled',
@@ -52,7 +54,24 @@ function updateSubscription(subscription, query) {
   return PostModel
     .find(query || { feedId: subscription.feedId }, { id: 1 })
     .lean()
-    .then(posts => makeUserPosts(subscription, posts, null, true))
+    .then(posts => {
+      const opts = {
+        body: { query: { term: { subscriptionId: subscription.id } } },
+        fields: ['tags', 'postId']
+      };
+      const merge = (aData, bData) => {
+        const union = new Set((aData || []).concat(bData || []));
+        return Array.from(union);
+      };
+
+      return searcher.scroll(opts).then(docs => {
+        const data = trans(docs)
+                .mapf('fields.tags', tags => ({ tags: merge(tags, subscription.tags) }))
+                .object('fields.postId', 'fields.tags', 'toString')
+                .value();
+        return makeUserPosts(subscription, posts, data, true);
+      });
+    })
     .then(docs => searcher.update(docs));
 }
 

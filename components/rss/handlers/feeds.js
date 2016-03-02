@@ -44,7 +44,7 @@ function bulkCreateFeeds(request) {
 function removeFeed(request) {
   const id = request.params.id;
   return SubscriptionModel
-    .find({ feedId: id })
+    .where({ feedId: id, disabled: { $ne: true } })
     .then(subs => ensureNotExists(subs, SubscriptionModel.modelName, id))
     .then(() => PostModel.remove({ feedId: id }))
     .then(() => helper.remove(id));
