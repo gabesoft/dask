@@ -28,7 +28,9 @@ Feed.index({
   link: 'text',
   title: 'text',
   uri: 'text',
-  userTitle: 'text'
+  userTitle: 'text',
+  default_language: 'en',
+  language_override: 'en'
 });
 
 module.exports = mongoose.model('Feed', Feed);

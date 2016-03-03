@@ -27,7 +27,9 @@ Post.index({
   description: 'text',
   link: 'text',
   summary: 'text',
-  title: 'text'
+  title: 'text',
+  default_language: 'en',
+  language_override: 'en'
 });
 
 module.exports = mongoose.model('Post', Post);
