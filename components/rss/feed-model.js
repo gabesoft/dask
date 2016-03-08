@@ -12,6 +12,7 @@ const Feed = schema.create({
   date: { type: Date },
   lastPostDate: { type: Date },
   description: { type: String },
+  originalDescription: { type: String },
   favicon: { type: String },
   generator: { type: String },
   image: { type: Object },
