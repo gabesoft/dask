@@ -34,7 +34,8 @@ class Helper {
           skip = data.skip || data.from || SKIP,
           limit = data.limit || data.size || LIMIT;
 
-    let fields = data.fields, sort = data.sort;
+    let fields = data.fields;
+    let sort = data.sort;
 
     fields = Array.isArray(fields) ? fields.join(' ') : fields;
     sort = Array.isArray(sort) ? sort.join(' ') : sort;
@@ -82,7 +83,10 @@ class Helper {
     return this.Model
       .findById(id)
       .then(doc => ensureExists(doc, this.Model.modelName, id))
-      .then(doc => doc.set(data || {}).save());
+      .then(doc => {
+        doc.oldData = doc.toObject();
+        return doc.set(data || {}).save().then(() => doc);
+      });
   }
 
   bulk(op, data) {

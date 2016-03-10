@@ -9,6 +9,7 @@
         "id-length": [2, {"min": 2, "max": 35, "properties": "never", "exceptions": ["$", "x", "y", "e", "i", "j", "k", "_"]}],
         "no-shadow": [2, {"builtinGlobals": false, "hoist": "functions", "allow": [ "_", "e", "err" ]}],
         "no-param-reassign": 0,
-        "no-else-return": 0
+        "no-else-return": 0,
+        "no-return-assign": 0
     }
 }

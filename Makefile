@@ -6,7 +6,7 @@ MPR = $(MODULES)/mpr
 NODE_DEV = $(MODULES)/node-dev
 
 MONGO_TEST_PORT = $(shell node -pe 'require("./config/test.json").mongo.port')
-TESTS := $(shell find ./test/components -name '*.js' -not -path './test/support')
+TESTS := $(shell find ./test/components -name '*.js' -not -path './test/support' -not -path '*.\#*')
 
 all: test
 

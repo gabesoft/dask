@@ -50,7 +50,23 @@ function addPosts(subscription, query, data) {
     .then(docs => searcher.index(docs));
 }
 
-function updateSubscription(subscription, query) {
+function computePostTags(subTagsNew, subTagsOld, postTags) {
+  const merge = (aData, bData) => {
+    const union = new Set((aData || []).concat(bData || []));
+    return Array.from(union);
+  };
+  const difference = (aData, bData) => {
+    const aSet = new Set(aData);
+    const bSet = new Set(bData);
+    const diff = new Set([...aSet].filter(x => !bSet.has(x)));
+    return Array.from(diff);
+  };
+  const removedTags = difference(subTagsOld || [], subTagsNew);
+
+  return difference(merge(postTags, subTagsNew), removedTags);
+}
+
+function updateSubscription(subscription, query, oldSubscription) {
   return PostModel
     .find(query || { feedId: subscription.feedId }, { id: 1 })
     .lean()
@@ -59,14 +75,15 @@ function updateSubscription(subscription, query) {
         body: { query: { term: { subscriptionId: subscription.id } } },
         fields: ['tags', 'postId']
       };
-      const merge = (aData, bData) => {
-        const union = new Set((aData || []).concat(bData || []));
-        return Array.from(union);
-      };
+
+      const oldTags = (oldSubscription || {}).tags || [],
+            newTags = subscription.tags;
 
       return searcher.scroll(opts).then(docs => {
         const data = trans(docs)
-                .mapf('fields.tags', tags => ({ tags: merge(tags, subscription.tags) }))
+                .mapf('fields.tags', tags => ({
+                  tags: computePostTags(newTags, oldTags, tags)
+                }))
                 .object('fields.postId', 'fields.tags', 'toString')
                 .value();
         return makeUserPosts(subscription, posts, data, true);
@@ -87,6 +104,7 @@ function deletePosts(subscriptionId) {
 module.exports = {
   addPosts,
   deletePosts,
+  computePostTags,
   makeUserPosts,
   updateSubscription
 };

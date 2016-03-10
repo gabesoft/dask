@@ -113,7 +113,7 @@ function updateSubscription(request) {
   return helper
     .update(request.payload, request.params.id)
     .then(sub => indexer
-          .updateSubscription(sub.toObject())
+          .updateSubscription(sub.toObject(), null, sub.oldData)
           .then(addUnreadCounts));
 }
 
