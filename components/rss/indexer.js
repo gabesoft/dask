@@ -89,7 +89,7 @@ function updateSubscription(subscription, query, oldSubscription) {
         return makeUserPosts(subscription, posts, data, true);
       });
     })
-    .then(docs => searcher.update(docs));
+    .then(docs => searcher.update(docs).then(() => docs));
 }
 
 function deletePosts(subscriptionId) {

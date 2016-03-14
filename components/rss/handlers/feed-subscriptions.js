@@ -14,6 +14,10 @@ const SubscriptionModel = require('../feed-subscription-model'),
 function addUnreadCounts(subscriptions) {
   subscriptions = Array.isArray(subscriptions) ? subscriptions : [subscriptions];
 
+  if (subscriptions.length === 0) {
+    return [];
+  }
+
   const feedIds = subscriptions.map(sub => sub.feedId).filter(Boolean);
   const userId = subscriptions[0].userId;
 
@@ -50,6 +54,14 @@ function addUnreadCounts(subscriptions) {
 }
 
 function search(data) {
+  data = data || {};
+  data.fields = data.fields || [];
+
+  if (data.fields.length > 0) {
+    // TODO: account for fields as a string
+    data.fields.push('userId');
+  }
+
   return helper
     .search(data, QUERY)
     .then(subs => subs.map(sub => sub.toObject()))
