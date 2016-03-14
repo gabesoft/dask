@@ -15,6 +15,7 @@ function addUnreadCounts(subscriptions) {
   subscriptions = Array.isArray(subscriptions) ? subscriptions : [subscriptions];
 
   const feedIds = subscriptions.map(sub => sub.feedId).filter(Boolean);
+  const userId = subscriptions[0].userId;
 
   return searcher
     .search({
@@ -22,7 +23,11 @@ function addUnreadCounts(subscriptions) {
         size: 0,
         query: {
           bool: {
-            must: [{ term: { read: false } }, { terms: { feedId: feedIds } }]
+            must: [
+              { term: { read: false } },
+              { term: { userId } },
+              { terms: { feedId: feedIds } }
+            ]
           }
         },
         aggs: {
