@@ -66,7 +66,7 @@ function computePostTags(subTagsNew, subTagsOld, postTags) {
   return difference(merge(postTags, subTagsNew), removedTags);
 }
 
-function updateSubscription(subscription, query, oldSubscription) {
+function updateSubscriptionPosts(subscription, query, oldSubscription) {
   return PostModel
     .find(query || { feedId: subscription.feedId }, { id: 1 })
     .lean()
@@ -106,5 +106,5 @@ module.exports = {
   deletePosts,
   computePostTags,
   makeUserPosts,
-  updateSubscription
+  updateSubscriptionPosts
 };

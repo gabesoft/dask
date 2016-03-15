@@ -18,8 +18,7 @@ function addUnreadCounts(subscriptions) {
     return [];
   }
 
-  const feedIds = subscriptions.map(sub => sub.feedId).filter(Boolean);
-  const userId = subscriptions[0].userId;
+  const subIds = subscriptions.map(sub => (sub.id || sub._id)).filter(Boolean);
 
   return searcher
     .search({
@@ -29,8 +28,7 @@ function addUnreadCounts(subscriptions) {
           bool: {
             must: [
               { term: { read: false } },
-              { term: { userId } },
-              { terms: { feedId: feedIds } }
+              { terms: { subscriptionId: subIds } }
             ]
           }
         },
@@ -54,14 +52,6 @@ function addUnreadCounts(subscriptions) {
 }
 
 function search(data) {
-  data = data || {};
-  data.fields = data.fields || [];
-
-  if (data.fields.length > 0) {
-    // TODO: account for fields as a string
-    data.fields.push('userId');
-  }
-
   return helper
     .search(data, QUERY)
     .then(subs => subs.map(sub => sub.toObject()))
@@ -130,14 +120,15 @@ function updateSubscription(request) {
   return helper
     .update(request.payload, request.params.id)
     .then(sub => indexer
-          .updateSubscription(sub.toObject(), null, sub.oldData)
+          .updateSubscriptionPosts(sub.toObject(), null, sub.oldData)
+          .then(() => sub)
           .then(addUnreadCounts));
 }
 
 function replaceSubscription(request) {
   return helper
     .replace(request.payload, request.params.id)
-    .then(sub => indexer.updateSubscription(sub.toObject()).then(() => sub));
+    .then(sub => indexer.updateSubscriptionPosts(sub.toObject()).then(() => sub));
 }
 
 const methods = {

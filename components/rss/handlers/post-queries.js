@@ -12,6 +12,7 @@ function parseData(doc) {
   } else if (doc) {
     return doc.set('data', JSON.parse(doc.get('dataJSON')));
   }
+  return null;
 }
 
 function stringifyData(payload) {
