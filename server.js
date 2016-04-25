@@ -57,8 +57,11 @@ function loadRoutes(cb) {
           server.route(route);
           log.info(`added ${chalk.blue((route || {}).method)} ${chalk.yellow((route || {}).path)}`);
         } catch (err) {
+          const method = chalk.blue((route || {}).method);
+          const routePath = chalk.yellow((route || {}).path);
+
           log.error(`failed to add routes from ${chalk.red(file)}`);
-          log.error(`skipped ${chalk.blue((route || {}).method)} ${chalk.yellow((route || {}).path)}`);
+          log.error(`skipped ${method} ${routePath}`);
           log.error(err.stack || err.message);
         }
       });
@@ -78,6 +81,8 @@ function registerPlugins(cb) {
   }, {
     register: require('lout'),
     options: { endpoint: '/documentation' }
+  }, {
+    register: require('pstatus/lib/hapi')
   }, {
     register: require('good'),
     options: {
