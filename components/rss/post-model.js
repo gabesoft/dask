@@ -15,6 +15,7 @@ const Post = schema.create({
   feedId: { type: Types.ObjectId, ref: 'Feed', required: true },
   guid: { type: String, required: true, index: { unique: true } },
   image: { type: Object },
+  inlineStatus: { type: Object },
   link: { type: String, required: true, index: { unique: true } },
   pubdate: { type: Date },
   source: { type: Object },
