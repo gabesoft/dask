@@ -21,7 +21,7 @@ const Feed = schema.create({
   lastPostDate: { type: Date },
   lastReadDate: { type: Date },
   lastReadStatus: { type: Object },
-  link: { type: String, required: true },
+  link: { type: String },
   postCount: { type: Number, required: true, default: 0 },
   title: { type: String },
   uri: { type: String, required: true, index: { unique: true } }
