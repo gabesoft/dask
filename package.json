@@ -28,7 +28,7 @@
     "mocha": "^2.4.5",
     "mocha-better-spec-reporter": "^3.0.2",
     "moment": "^2.13.0",
-    "mongoose": "^4.4.13",
+    "mongoose": "^4.6.3",
     "mpr": "^0.1.19",
     "nconf": "^0.8.4",
     "node-dev": "^3.1.0",

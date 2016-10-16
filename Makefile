@@ -17,7 +17,7 @@ help:
 	@sh -c "$(MAKE) -rpn no_targets__ | awk -F':' '/^[a-zA-Z0-9][^\$$#\/\\t=]*:([^=]|$$)/ {split(\$$1,A,/ /);for(i in A)print A[i]}' | grep -v '__\$$' | grep -v 'Makefile' | grep -v 'make\[1\]' | sort"
 
 serve:
-	@$(NODE_DEV) server.js
+	@$(NODE_DEV) server.js --port 8006
 
 run:
 	@$(MPR) run mpr.json

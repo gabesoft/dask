@@ -32,7 +32,7 @@ class Helper {
 
     const query = Object.assign({}, defaults.query || {}, data.query),
           skip = data.skip || data.from || SKIP,
-          limit = data.limit || data.size || LIMIT;
+          limit = parseInt(data.limit, 10) || parseInt(data.size, 10) || LIMIT;
 
     let fields = data.fields;
     let sort = data.sort;
