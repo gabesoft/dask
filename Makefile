@@ -22,6 +22,10 @@ serve:
 run:
 	@$(MPR) run mpr.json
 
+package:
+	node2nix
+	nix-build default.nix
+
 start-mongo-test:
 	@ulimit -n 2048 && \
 	mongod --port $(MONGO_TEST_PORT) --dbpath /tmp --fork --logpath /tmp/mongo-test.log
