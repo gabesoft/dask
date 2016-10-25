@@ -9,7 +9,7 @@ nconf.overrides({
   env,
   path: {
     root,
-    config: path.join(root, 'config', env) + '.json'
+    config: process.env.DASK_CONFIG_PATH || (path.join(root, 'config', env) + '.json')
   }
 });
 

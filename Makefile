@@ -23,8 +23,13 @@ run:
 	@$(MPR) run mpr.json
 
 package:
-	node2nix
+	node2nix --include-peer-dependencies
+
+package-build: package
 	nix-build default.nix
+
+package-install: package
+	nix-env -if default.nix
 
 start-mongo-test:
 	@ulimit -n 2048 && \
