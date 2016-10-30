@@ -11,9 +11,9 @@
         "port": 6379
     },
     "elasticsearch": {
-        "host": "10.0.1.2",
+        "host": "localhost",
         "port": 9200,
-        "index": ".dev-dask-rss-v2",
+        "index": ".prod-dask-rss-v1",
         "log-level": ["error"],
         "api-version": "2.1"
     }
