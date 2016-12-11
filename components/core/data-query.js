@@ -65,7 +65,7 @@ class DataQuery {
   /**
    * Returns a mongose query object ready for execution.
    *
-   * @param {Object} the mongoose model
+   * @param {Object} model the mongoose model
    * @returns {Object} the mongoose query object
    */
   getQuery(model) {
